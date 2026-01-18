@@ -27,8 +27,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold tracking-widest uppercase">
-          <span className={isScrolled ? 'text-black' : 'text-white'}>NJNY</span>
-          <span className="text-gray-500">Realty</span>
+          <span className={isScrolled ? 'text-black' : 'text-white'}>NJ Eunice's</span>
+          <span className="text-gray-500 ml-2">Real Estate</span>
         </Link>
 
         {/* Desktop Menu */}

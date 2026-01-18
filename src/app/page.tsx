@@ -29,11 +29,11 @@ export default function Home() {
         <div className="w-full md:w-1/2 space-y-8">
           <h2 className="text-4xl font-light tracking-tight text-gray-900 border-l-4 border-black pl-6">
             Meet Eunice <br />
-            <span className="font-bold">Your Trusted NJ & NY Partner</span>
+            <span className="font-bold">Your Trusted NJ Partner</span>
           </h2>
 
           <p className="text-gray-600 leading-relaxed text-lg font-light">
-            Eunice is a professional real estate agent specializing in the New Jersey and New York metropolitan areas. With years of dedicated service, she brings a wealth of market knowledge and specific expertise in luxury homes, investment properties, and commercial real estate.
+            Eunice is a professional real estate agent specializing in the New Jersey metropolitan area. With years of dedicated service, she brings a wealth of market knowledge and specific expertise in luxury homes, investment properties, and commercial real estate.
           </p>
 
           <p className="text-gray-600 leading-relaxed text-lg font-light">
@@ -50,6 +50,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Testimonials />
 
       {/* Featured Listings Placeholder */}
       <section className="py-20 bg-gray-50 px-6">
@@ -72,7 +74,6 @@ export default function Home() {
         </div>
       </section>
 
-      <Testimonials />
       <Footer />
     </main>
   );

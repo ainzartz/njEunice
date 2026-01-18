@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NJNY Realty Web Platform",
-  description: "Advanced Real Estate Platform for New Jersey and New York",
+  title: "NJ Eunice's Real Estate Web Platform",
+  description: "Advanced Real Estate Platform for New Jersey",
 };
 
 export default function RootLayout({

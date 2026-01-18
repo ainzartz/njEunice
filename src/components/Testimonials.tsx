@@ -13,41 +13,50 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <div className="bg-black text-white py-12 overflow-hidden relative border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
-        <h3 className="text-xl font-bold uppercase tracking-widest text-gray-400">Client Success Stories</h3>
+    <div className="bg-neutral-950 text-white py-24 overflow-hidden relative border-t border-gray-900">
+      <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
+        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-gray-500 mb-3">Excellence in Service</h3>
+        <h2 className="text-3xl md:text-5xl font-serif text-white">What Our Clients Say</h2>
       </div>
 
       {/* Marquee Container */}
       <div className="relative flex overflow-x-hidden">
-        <div className="animate-marquee whitespace-nowrap flex space-x-12">
+        <div className="animate-marquee whitespace-nowrap flex space-x-24 items-center">
           {testimonials.concat(testimonials).map((text, index) => (
-            <span key={index} className="text-lg md:text-2xl font-light text-gray-300 mx-4">
-              “{text}”
-            </span>
+            <div key={index} className="mx-8 flex items-center">
+              <span className="text-4xl text-gray-700 font-serif opacity-30 mr-4">“</span>
+              <span className="text-xl md:text-3xl font-serif text-gray-200 tracking-wide leading-relaxed">
+                {text}
+              </span>
+              <span className="text-4xl text-gray-700 font-serif opacity-30 ml-4">”</span>
+            </div>
           ))}
         </div>
 
-        {/* Duplicate for seamless loop (absolute positioning approach often safer or just doubling content above) */}
-        <div className="absolute top-0 animate-marquee2 whitespace-nowrap flex space-x-12">
+        {/* Duplicate for seamless loop */}
+        <div className="absolute top-0 animate-marquee2 whitespace-nowrap flex space-x-24 items-center">
           {testimonials.concat(testimonials).map((text, index) => (
-            <span key={`dup-${index}`} className="text-lg md:text-2xl font-light text-gray-300 mx-4">
-              “{text}”
-            </span>
+            <div key={`dup-${index}`} className="mx-8 flex items-center">
+              <span className="text-4xl text-gray-700 font-serif opacity-30 mr-4">“</span>
+              <span className="text-xl md:text-3xl font-serif text-gray-200 tracking-wide leading-relaxed">
+                {text}
+              </span>
+              <span className="text-4xl text-gray-700 font-serif opacity-30 ml-4">”</span>
+            </div>
           ))}
         </div>
       </div>
 
       {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 h-full w-24 bg-gradient-to-r from-black to-transparent z-10"></div>
-      <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-black to-transparent z-10"></div>
+      <div className="absolute top-0 left-0 h-full w-32 bg-gradient-to-r from-neutral-950 to-transparent z-10"></div>
+      <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-neutral-950 to-transparent z-10"></div>
 
       <style jsx>{`
         .animate-marquee {
-          animation: marquee 25s linear infinite;
+          animation: marquee 60s linear infinite;
         }
         .animate-marquee2 {
-          animation: marquee2 25s linear infinite;
+          animation: marquee2 60s linear infinite;
         }
         @keyframes marquee {
           0% { transform: translateX(0%); }

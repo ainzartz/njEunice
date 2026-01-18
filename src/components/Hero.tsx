@@ -22,7 +22,7 @@ const Hero = () => {
           Discover Your <span className="font-bold">Dream Home</span>
         </h1>
         <p className="text-lg md:text-xl font-light tracking-wide mb-10 text-gray-200">
-          Premier Real Estate in New Jersey & New York
+          Premier Real Estate in New Jersey
         </p>
 
         {/* Search Bar - Modern & Minimal */}
