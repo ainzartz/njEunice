@@ -33,7 +33,7 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-8 items-center">
-          {['Buy', 'Sell', 'Communities', 'About', 'Contact'].map((item) => (
+          {['Buy', 'Sell', 'Lease', 'Commercial', 'About', 'Contact'].map((item) => (
             <Link
               key={item}
               href={`/${item.toLowerCase()}`}
@@ -43,15 +43,6 @@ const Navbar = () => {
               {item}
             </Link>
           ))}
-          <Link
-            href="/login"
-            className={`px-5 py-2 border text-sm font-medium uppercase tracking-wider transition-all ${isScrolled
-              ? 'border-black text-black hover:bg-black hover:text-white'
-              : 'border-white text-white hover:bg-white hover:text-black'
-              }`}
-          >
-            Login
-          </Link>
         </div>
 
         {/* Mobile Menu Button (Hamburger) - Placeholder */}
