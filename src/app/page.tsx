@@ -12,7 +12,7 @@ export default function Home() {
       <Hero />
 
       {/* Realtor Bio Section */}
-      <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
+      <section id="about" className="py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
         <div className="w-full md:w-1/2 relative h-[600px] bg-gray-100 p-8 shadow-2xl">
           <div className="relative w-full h-full grayscale hover:grayscale-0 transition-all duration-700">
             <Image

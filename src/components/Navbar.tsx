@@ -1,10 +1,12 @@
 "use client";
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +20,24 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href === '/#about') {
+      e.preventDefault();
+      // Use window.location.hash logic or just scroll if we are on home
+      if (pathname === '/') {
+        const element = document.getElementById('about');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          // Update URL without jump if desired, or just let it be.
+          // window.history.pushState({}, '', '/#about');
+        }
+      } else {
+        // If not on home, just follow the link which will load home and scroll (handled by css smooth scroll)
+        window.location.href = '/#about';
+      }
+    }
+  };
 
   return (
     <nav
@@ -33,16 +53,20 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-8 items-center">
-          {['Buy', 'Sell', 'Lease', 'Commercial', 'About', 'Contact'].map((item) => (
-            <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
-              className={`text-sm font-medium uppercase tracking-wider hover:text-gray-400 transition-colors ${isScrolled ? 'text-black' : 'text-white'
-                }`}
-            >
-              {item}
-            </Link>
-          ))}
+          {['Buy', 'Sell', 'Lease', 'Commercial', 'About', 'Contact'].map((item) => {
+            const href = item === 'About' ? '/#about' : `/${item.toLowerCase()}`;
+            return (
+              <Link
+                key={item}
+                href={href}
+                onClick={(e) => handleLinkClick(e, href)}
+                className={`text-sm font-medium uppercase tracking-wider hover:text-gray-400 transition-colors ${isScrolled ? 'text-black' : 'text-white'
+                  }`}
+              >
+                {item}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Mobile Menu Button (Hamburger) - Placeholder */}
