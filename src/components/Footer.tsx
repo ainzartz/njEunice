@@ -7,9 +7,9 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand & Address */}
-          <div className="space-y-4 lg:col-span-1">
+          <div className="space-y-4 lg:col-span-1 pr-4">
             <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice's Real Estate</h3>
-            <div className="pt-6 relative h-24 w-72">
+            <div className="pt-6 relative h-20 w-64 max-w-full">
               <Image
                 src="/images/footer_banner.png"
                 alt="Eunice Hwang - Re/Max Now"
