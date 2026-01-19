@@ -38,7 +38,7 @@ const ScrollRevealImage = ({ src, alt, className, fill }: ScrollRevealImageProps
   }, []);
 
   return (
-    <div ref={imgRef} className={`relative w-full h-full overflow-hidden transition-all duration-1000 ease-in-out ${isVisible ? 'grayscale-0' : 'grayscale'} ${className}`}>
+    <div ref={imgRef} className={`relative w-full h-full overflow-hidden transition-all duration-[2000ms] ease-in-out ${isVisible ? 'grayscale-0' : 'grayscale'} ${className}`}>
       <Image
         src={src}
         alt={alt}
