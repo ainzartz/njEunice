@@ -52,9 +52,9 @@ const Footer = () => {
           {/* MLS Disclaimer - Integrated into Grid (2 columns on Desktop) */}
           <div className="lg:col-span-2">
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">MLS® Disclaimer</h4>
-            <div className="flex flex-col gap-4">
-              {/* Logo and Text Container */}
-              <div className="float-left mr-4 mb-2 w-24 h-8 relative">
+            <div>
+              {/* Logo - Floated left to allow text wrapping */}
+              <div className="float-left mr-2 mb-1 w-24 h-8 relative">
                 <Image
                   src="/images/njmls_logo.png"
                   alt="NJMLS Logo"
@@ -62,11 +62,10 @@ const Footer = () => {
                   className="object-contain object-left"
                 />
               </div>
-              <p className="text-[10px] text-gray-500 leading-relaxed text-justify">
-                The data relating to the real estate for sale on this web site comes in part from the Internet Data Exchange Program of the NJMLS. Real estate listings held by brokerage firms other than RE/MAX Now are marked with the Internet Data Exchange logo and information about them includes the name of the listing brokers. Some properties listed with the participating brokers do not appear on this website at the request of the seller. Listings of brokers that do not participate in Internet Data Exchange do not appear on this website. All information deemed reliable but not guaranteed. Last date updated: January 19, 2026 2:47 PM UTC Source: New Jersey Multiple Listing Service, Inc.
-              </p>
-              <p className="text-[10px] text-gray-500 leading-relaxed">
-                © 2026 New Jersey Multiple Listing Service, Inc. All rights reserved.
+
+              {/* Merged Text Block - Tight leading, justified */}
+              <p className="text-[10px] text-gray-500 leading-tight text-justify">
+                The data relating to the real estate for sale on this web site comes in part from the Internet Data Exchange Program of the NJMLS. Real estate listings held by brokerage firms other than RE/MAX Now are marked with the Internet Data Exchange logo and information about them includes the name of the listing brokers. Some properties listed with the participating brokers do not appear on this website at the request of the seller. Listings of brokers that do not participate in Internet Data Exchange do not appear on this website. All information deemed reliable but not guaranteed. Last date updated: January 19, 2026 2:47 PM UTC Source: New Jersey Multiple Listing Service, Inc. © 2026 New Jersey Multiple Listing Service, Inc. All rights reserved.
               </p>
             </div>
           </div>
@@ -84,8 +83,6 @@ const Footer = () => {
                 aria-label="Equal Housing Opportunity"
               >
                 <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2zm1 14h-2v-2h2v2zm0-4h-2V9h2v3z" />
-                {/* Note: This is a simplified House icon. For strict compliance, the official 'Equal Housing Opportunity' logo (House with Equal sign) is preferred if available as asset. 
-                    Adding the specific 'Equal' sign path below to approximate the official logo. */}
                 <path d="M7 14h10v2H7zM7 11h10v2H7z" fill="white" stroke="currentColor" strokeWidth="0.5" />
               </svg>
               <Link href="/fair-housing-statement" className="hover:text-white transition-colors">Fair Housing Statement</Link>
