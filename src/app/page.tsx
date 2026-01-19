@@ -2,8 +2,8 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
-import Image from 'next/image';
 import Link from 'next/link';
+import ScrollRevealImage from '@/components/ScrollRevealImage';
 
 export default function Home() {
   return (
@@ -14,14 +14,11 @@ export default function Home() {
       {/* Realtor Bio Section */}
       <section id="about" className="py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
         <div className="w-full md:w-1/2 relative h-[600px] bg-gray-100 p-8 shadow-2xl">
-          <div className="relative w-full h-full grayscale hover:grayscale-0 transition-all duration-700">
-            <Image
-              src="/images/eunice.jpg"
-              alt="Eunice - Professional Realtor"
-              fill
-              className="object-cover object-top"
-            />
-          </div>
+          <ScrollRevealImage
+            src="/images/eunice.jpg"
+            alt="Eunice - Professional Realtor"
+            fill={true}
+          />
           {/* Decorative frame */}
           <div className="absolute top-0 left-0 w-full h-full border border-black transform translate-x-4 translate-y-4 -z-10"></div>
         </div>

@@ -26,3 +26,17 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+@keyframes grayscaleToColor {
+  0% {
+    filter: grayscale(100%);
+  }
+
+  100% {
+    filter: grayscale(0%);
+  }
+}
+
+.animate-grayscale-to-color {
+  animation: grayscaleToColor 3s ease-in-out forwards;
+}

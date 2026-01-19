@@ -12,10 +12,10 @@ const Footer = () => {
             <p className="text-gray-400 text-sm leading-relaxed">
               Your trusted partner for premier real estate opportunities in New Jersey.
             </p>
-            <div className="pt-6 relative h-16 w-48">
+            <div className="pt-6 relative h-24 w-72">
               <Image
-                src="/images/remax_logo.png"
-                alt="Re/Max Now"
+                src="/images/footer_banner.png"
+                alt="Eunice Hwang - Re/Max Now"
                 fill
                 className="object-contain object-left opacity-90 hover:opacity-100 transition-opacity"
               />
