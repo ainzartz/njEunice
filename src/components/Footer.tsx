@@ -84,7 +84,7 @@ const Footer = () => {
             </div>
             <Link href="/terms-of-use" className="hover:text-white transition-colors">Terms of Use</Link>
             <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/cis" className="hover:text-white transition-colors">Consumer Info Statement</Link>
+            <Link href="/cis" className="hover:text-white transition-colors">NJ CIS (Agency Disclosure)</Link>
             <Link href="/legal" className="hover:text-white transition-colors">Legal Disclaimer</Link>
             <Link href="/dmca" className="hover:text-white transition-colors">DMCA Notice</Link>
             <Link href="/accessibility" className="hover:text-white transition-colors">Accessibility</Link>
