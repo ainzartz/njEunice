@@ -4,8 +4,8 @@ import Image from 'next/image';
 const Footer = () => {
   return (
     <footer className="bg-black text-white pt-16 pb-8 border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[23%_15%_27%_35%] gap-8 mb-12">
+      <div className="max-w-7xl mx-auto px-6 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[23%_15%_27%_35%] gap-8">
           {/* Brand & Address */}
           <div className="space-y-4 pr-4">
             <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice's Real Estate</h3>
@@ -70,15 +70,20 @@ const Footer = () => {
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Full Width Separator */}
+      <div className="w-full border-t border-gray-800"></div>
+
+      {/* Bottom Bar Container */}
+      <div className="max-w-7xl mx-auto px-6 pt-8">
         {/* Bottom Bar - Legal Links */}
-        {/* Adjusted Grid: Copyright takes 1st col, Links take remaining 3 cols */}
-        <div className="border-t border-gray-800 pt-8 grid grid-cols-1 lg:grid-cols-[23%_15%_27%_35%] gap-8 text-[10px] text-gray-500">
+        <div className="grid grid-cols-1 lg:grid-cols-[23%_15%_27%_35%] gap-8 text-[10px] text-gray-500">
           <div className="lg:col-span-1 flex items-center">
             <p>&copy; {new Date().getFullYear()} NJ Eunice's Real Estate. All rights reserved.</p>
           </div>
 
-          <div className="lg:col-span-3 flex flex-nowrap whitespace-nowrap gap-x-3 items-center justify-end overflow-hidden">
+          <div className="lg:col-span-3 flex flex-nowrap whitespace-nowrap gap-x-3 items-center justify-end overflow-visible">
             <div className="flex items-center gap-2">
               <svg
                 className="w-4 h-4 text-gray-500"
