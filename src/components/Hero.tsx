@@ -1,6 +1,22 @@
+"use client";
+
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const Hero = () => {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm)}`);
+    } else {
+      router.push('/search');
+    }
+  };
+
   return (
     <div className="relative h-screen min-h-[600px] w-full flex items-center justify-center">
       {/* Background Image */}
@@ -26,7 +42,7 @@ const Hero = () => {
         </p>
 
         {/* Search Bar - Modern & Minimal */}
-        <div className="bg-white p-2 rounded-lg shadow-2xl max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-2">
+        <form onSubmit={handleSearch} className="bg-white p-2 rounded-lg shadow-2xl max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-2">
           <div className="flex-1 w-full relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -37,13 +53,18 @@ const Hero = () => {
               type="text"
               placeholder="Enter an address, neighborhood, city, or ZIP code"
               className="w-full pl-10 pr-4 py-3 rounded-md text-gray-800 placeholder-gray-500 focus:outline-none"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <button className="w-full md:w-auto bg-black text-white font-medium uppercase tracking-wider py-3 px-8 rounded-md hover:bg-gray-800 transition-colors">
+          <button
+            type="submit"
+            className="w-full md:w-auto bg-black text-white font-medium uppercase tracking-wider py-3 px-8 rounded-md hover:bg-gray-800 transition-colors"
+          >
             Search
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );

@@ -67,6 +67,12 @@ export default function OptOutPage() {
                 </button>
               </div>
             </form>
+
+            <div className="pt-8 border-t border-gray-100 mt-8">
+              <a href="/" className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
+                Return to Home
+              </a>
+            </div>
           </>
         ) : (
           <div className="bg-gray-100 p-8 border border-gray-200 mt-8">

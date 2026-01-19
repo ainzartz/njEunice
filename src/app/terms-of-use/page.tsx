@@ -17,7 +17,7 @@ export default function TermsOfUse() {
           </p>
 
           <div>
-            <span className="font-bold text-black">TCPA & Registration Terms:</span> If you choose to register on our website, you hereby consent to receive autodialed and/or pre-recorded telemarketing calls, text messages, and emails on the provided number from or on behalf of Eunice Hwang or RE/MAX Now (located at Palisades Park, NJ); from the following telephone numbers: 201-891-8000 or 201-290-5256, or from other numbers related to or affiliated with the agent or the company. Standard message and data rates may apply. You also certify that the provided number is your actual cell phone number. To Opt-out: If you wish to opt out of phone calls, texts, or emails, please reply "STOP" to any text message you receive, or visit our opt-out page at https://www.sellbyeunice.com/optout.
+            <span className="font-bold text-black">TCPA & Registration Terms:</span> If you choose to register on our website, you hereby consent to receive autodialed and/or pre-recorded telemarketing calls, text messages, and emails on the provided number from or on behalf of Eunice Hwang or RE/MAX Now (located at Palisades Park, NJ); from the following telephone numbers: 201-891-8000 or 201-290-5256, or from other numbers related to or affiliated with the agent or the company. Standard message and data rates may apply. You also certify that the provided number is your actual cell phone number. To Opt-out: If you wish to opt out of phone calls, texts, or emails, please reply "STOP" to any text message you receive, or visit our opt-out page at <Link href="/optout" className="text-blue-600 hover:underline">https://www.sellbyeunice.com/optout</Link>.
           </div>
 
           <div>
