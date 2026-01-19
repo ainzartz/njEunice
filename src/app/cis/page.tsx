@@ -43,7 +43,7 @@ export default function CISPage() {
 
           <div className="pt-6">
             <a
-              href="https://www.nj.gov/dobi/division_rec/cis.pdf"
+              href="https://www.nj.gov/dobi//bulletins/blt24_11Info.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-black font-bold uppercase tracking-widest border-b-2 border-black hover:text-gray-600 hover:border-gray-600 transition-colors pb-1"
