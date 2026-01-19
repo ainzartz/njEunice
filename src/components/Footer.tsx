@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="bg-black text-white pt-16 pb-8 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           {/* Brand & Address */}
           <div className="space-y-4">
             <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice's Real Estate</h3>
