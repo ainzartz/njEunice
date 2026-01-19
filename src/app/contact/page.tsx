@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -21,6 +21,19 @@ export default function ContactPage() {
   const [verificationStep, setVerificationStep] = useState<'idle' | 'sent' | 'verified'>('idle');
   const [generatedCode, setGeneratedCode] = useState('');
   const [verificationCodeInput, setVerificationCodeInput] = useState('');
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCountdown > 0) {
+      timer = setInterval(() => {
+        setResendCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [resendCountdown]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -39,6 +52,7 @@ export default function ContactPage() {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedCode(code);
     setVerificationStep('sent');
+    setResendCountdown(15);
 
     // Mock Send
     console.log("--------------------------------");
@@ -53,6 +67,7 @@ export default function ContactPage() {
       setEmailVerified(true);
       setVerificationStep('verified');
       setVerificationCodeInput('');
+      setResendCountdown(0);
       alert("Email verified successfully!");
     } else {
       alert("Incorrect code. Please try again.");
@@ -181,9 +196,15 @@ export default function ContactPage() {
                       <button
                         type="button"
                         onClick={handleVerifyEmail}
-                        className="bg-black text-white px-6 font-bold uppercase tracking-wider text-sm hover:bg-gray-900 transition-colors whitespace-nowrap"
+                        disabled={resendCountdown > 0 || !formData.email}
+                        className={`px-6 font-bold uppercase tracking-wider text-sm transition-colors whitespace-nowrap min-w-[120px] ${resendCountdown > 0 || !formData.email
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-black text-white hover:bg-gray-900'
+                          }`}
                       >
-                        Verify
+                        {resendCountdown > 0
+                          ? `Resend (${resendCountdown}s)`
+                          : (verificationStep === 'sent' ? 'Resend' : 'Verify')}
                       </button>
                     ) : (
                       <div className="flex items-center px-4 bg-green-50 border border-green-200 text-green-700 font-bold uppercase tracking-wider text-xs whitespace-nowrap">
@@ -277,8 +298,8 @@ export default function ContactPage() {
                   type="submit"
                   disabled={!consentChecked}
                   className={`w-full py-4 font-bold uppercase tracking-widest transition-colors ${!consentChecked
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-black text-white hover:bg-gray-900'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-black text-white hover:bg-gray-900'
                     }`}
                 >
                   Send Message
