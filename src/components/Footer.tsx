@@ -5,9 +5,9 @@ const Footer = () => {
   return (
     <footer className="bg-black text-white pt-16 pb-8 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[23%_15%_27%_35%] gap-8 mb-12">
           {/* Brand & Address */}
-          <div className="space-y-4 lg:col-span-1 pr-4">
+          <div className="space-y-4 pr-4">
             <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice's Real Estate</h3>
             <div className="pt-6 relative h-20 w-64 max-w-full">
               <Image
@@ -20,7 +20,7 @@ const Footer = () => {
           </div>
 
           {/* Navigation */}
-          <div className="lg:col-span-1">
+          <div>
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">Explore</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li><Link href="/buy" className="hover:text-white transition-colors">Buy</Link></li>
@@ -30,15 +30,15 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info (Formerly Company) */}
-          <div className="lg:col-span-1">
+          {/* Contact Info */}
+          <div>
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">Contact Info</h4>
             <div className="space-y-4 text-sm text-gray-400">
               <p className="leading-relaxed">
                 460 Bergen Blvd. Suite 120 <br />
                 Palisades Park, NJ 07650
               </p>
-              <p className="leading-relaxed">
+              <p className="leading-relaxed whitespace-nowrap">
                 C: 201.290.5256 | O: 201.891.8000
               </p>
               <p>
@@ -49,8 +49,8 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* MLS Disclaimer - Integrated into Grid (2 columns on Desktop) */}
-          <div className="lg:col-span-2">
+          {/* MLS Disclaimer */}
+          <div>
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">MLS® Disclaimer</h4>
             <div>
               {/* Logo - Floated left to allow text wrapping */}
