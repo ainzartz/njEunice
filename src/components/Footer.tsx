@@ -5,13 +5,10 @@ const Footer = () => {
   return (
     <footer className="bg-black text-white pt-16 pb-8 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand & Address */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:col-span-1">
             <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice's Real Estate</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Your trusted partner for premier real estate opportunities in New Jersey.
-            </p>
             <div className="pt-6 relative h-24 w-72">
               <Image
                 src="/images/footer_banner.png"
@@ -23,7 +20,7 @@ const Footer = () => {
           </div>
 
           {/* Navigation */}
-          <div>
+          <div className="lg:col-span-1">
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">Explore</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li><Link href="/buy" className="hover:text-white transition-colors">Buy</Link></li>
@@ -34,7 +31,7 @@ const Footer = () => {
           </div>
 
           {/* Contact Info (Formerly Company) */}
-          <div>
+          <div className="lg:col-span-1">
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">Contact Info</h4>
             <div className="space-y-4 text-sm text-gray-400">
               <p className="leading-relaxed">
@@ -52,8 +49,8 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* MLS Disclaimer */}
-          <div>
+          {/* MLS Disclaimer - Integrated into Grid (2 columns on Desktop) */}
+          <div className="lg:col-span-2">
             <h4 className="text-sm font-bold uppercase tracking-wider mb-6">MLS® Disclaimer</h4>
             <div className="flex flex-col gap-4">
               {/* Logo and Text Container */}
