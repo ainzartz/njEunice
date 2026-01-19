@@ -19,9 +19,9 @@ export default function ContactPage() {
   // Email Verification State
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationStep, setVerificationStep] = useState<'idle' | 'sent' | 'verified'>('idle');
-  const [generatedCode, setGeneratedCode] = useState('');
   const [verificationCodeInput, setVerificationCodeInput] = useState('');
   const [resendCountdown, setResendCountdown] = useState(0);
+  const [serverCodeHash, setServerCodeHash] = useState('');
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -43,27 +43,53 @@ export default function ContactPage() {
     }));
   };
 
-  const handleVerifyEmail = () => {
+  const sha256 = async (message: string) => {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const handleVerifyEmail = async () => {
     if (!formData.email) {
       alert("Please enter an email address first.");
       return;
     }
-    // Generate 6-digit random code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(code);
-    setVerificationStep('sent');
+
     setResendCountdown(15);
 
-    // Mock Send
-    console.log("--------------------------------");
-    console.log(`[MOCK EMAIL SEND] To: ${formData.email}`);
-    console.log(`[MOCK EMAIL SEND] Verification Code: ${code}`);
-    console.log("--------------------------------");
-    alert(`Testing Mode: Verification code is ${code}`);
+    try {
+      const response = await fetch('/api/email/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setServerCodeHash(data.hash);
+        setVerificationStep('sent');
+        alert("Verification code sent to " + formData.email);
+      } else {
+        alert("Failed to send email: " + (data.error || "Unknown error"));
+        setResendCountdown(0); // Reset timer on failure
+      }
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      alert("An error occurred. Please try again.");
+      setResendCountdown(0);
+    }
   };
 
-  const handleConfirmCode = () => {
-    if (verificationCodeInput === generatedCode) {
+  const handleConfirmCode = async () => {
+    if (!verificationCodeInput) return;
+
+    const inputHash = await sha256(verificationCodeInput);
+
+    if (inputHash === serverCodeHash) {
       setEmailVerified(true);
       setVerificationStep('verified');
       setVerificationCodeInput('');
