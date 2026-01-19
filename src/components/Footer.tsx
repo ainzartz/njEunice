@@ -72,9 +72,12 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar - Legal Links */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} NJ Eunice's Real Estate. All rights reserved.</p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center md:justify-end">
+        <div className="border-t border-gray-800 pt-8 grid grid-cols-1 lg:grid-cols-[23%_15%_27%_35%] gap-8 text-xs text-gray-500">
+          <div className="lg:col-span-3 flex items-center">
+            <p>&copy; {new Date().getFullYear()} NJ Eunice's Real Estate. All rights reserved.</p>
+          </div>
+
+          <div className="flex flex-wrap gap-x-4 gap-y-2 items-center">
             <div className="flex items-center gap-2">
               <svg
                 className="w-4 h-4 text-gray-500"
@@ -90,7 +93,6 @@ const Footer = () => {
             <Link href="/terms-of-use" className="hover:text-white transition-colors">Terms of Use</Link>
             <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/cis" className="hover:text-white transition-colors">NJ CIS (Agency Disclosure)</Link>
-
             <Link href="/dmca" className="hover:text-white transition-colors">DMCA Notice</Link>
             <Link href="/accessibility" className="hover:text-white transition-colors">Accessibility</Link>
           </div>
