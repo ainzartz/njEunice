@@ -68,6 +68,21 @@ const Footer = () => {
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-xs text-gray-500">
           <p>&copy; {new Date().getFullYear()} NJ Eunice's Real Estate. All rights reserved.</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center md:justify-end">
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-4 h-4 text-gray-500"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-label="Equal Housing Opportunity"
+              >
+                <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2zm1 14h-2v-2h2v2zm0-4h-2V9h2v3z" />
+                {/* Note: This is a simplified House icon. For strict compliance, the official 'Equal Housing Opportunity' logo (House with Equal sign) is preferred if available as asset. 
+                    Adding the specific 'Equal' sign path below to approximate the official logo. */}
+                <path d="M7 14h10v2H7zM7 11h10v2H7z" fill="white" stroke="currentColor" strokeWidth="0.5" />
+              </svg>
+              <Link href="/fair-housing-statement" className="hover:text-white transition-colors">Fair Housing Statement</Link>
+            </div>
+            <Link href="/terms-of-use" className="hover:text-white transition-colors">Terms of Use</Link>
             <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/cis" className="hover:text-white transition-colors">Consumer Info Statement</Link>
             <Link href="/legal" className="hover:text-white transition-colors">Legal Disclaimer</Link>
