@@ -52,15 +52,26 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Compliance Text */}
+          {/* MLS Disclaimer */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider mb-6">Compliance</h4>
-            <p className="text-xs text-gray-500 leading-relaxed mb-4">
-              The data relating to real estate for sale on this web site comes in part from the Internet Data Exchange (IDX) program of the NJMLS. Real estate listings held by brokerage firms other than NJ Eunice's Real Estate are marked with the NJMLS logo and information about them includes the name of the listing brokers.
-            </p>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Information deemed reliable but not guaranteed. © {new Date().getFullYear()} NJMLS, Inc. All rights reserved.
-            </p>
+            <h4 className="text-sm font-bold uppercase tracking-wider mb-6">MLS® Disclaimer</h4>
+            <div className="flex flex-col gap-4">
+              {/* Logo and Text Container */}
+              <div className="float-left mr-4 mb-2 w-24 h-8 relative">
+                <Image
+                  src="/images/njmls_logo.png"
+                  alt="NJMLS Logo"
+                  fill
+                  className="object-contain object-left"
+                />
+              </div>
+              <p className="text-[10px] text-gray-500 leading-relaxed text-justify">
+                The data relating to the real estate for sale on this web site comes in part from the Internet Data Exchange Program of the NJMLS. Real estate listings held by brokerage firms other than RE/MAX Now are marked with the Internet Data Exchange logo and information about them includes the name of the listing brokers. Some properties listed with the participating brokers do not appear on this website at the request of the seller. Listings of brokers that do not participate in Internet Data Exchange do not appear on this website. All information deemed reliable but not guaranteed. Last date updated: January 19, 2026 2:47 PM UTC Source: New Jersey Multiple Listing Service, Inc.
+              </p>
+              <p className="text-[10px] text-gray-500 leading-relaxed">
+                © 2026 New Jersey Multiple Listing Service, Inc. All rights reserved.
+              </p>
+            </div>
           </div>
         </div>
 
