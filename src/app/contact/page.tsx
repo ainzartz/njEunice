@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -13,16 +13,14 @@ export default function ContactPage() {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  // Consent and CAPTCHA State
+  // Consent State
   const [consentChecked, setConsentChecked] = useState(false);
-  const [captchaTarget, setCaptchaTarget] = useState<number | null>(null);
-  const [captchaInput, setCaptchaInput] = useState('');
 
-  // Generate random 4-digit number on mount
-  useEffect(() => {
-    setCaptchaTarget(Math.floor(1000 + Math.random() * 9000));
-  }, []);
-
+  // Email Verification State
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationStep, setVerificationStep] = useState<'idle' | 'sent' | 'verified'>('idle');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [verificationCodeInput, setVerificationCodeInput] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -30,6 +28,35 @@ export default function ContactPage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleVerifyEmail = () => {
+    if (!formData.email) {
+      alert("Please enter an email address first.");
+      return;
+    }
+    // Generate 6-digit random code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedCode(code);
+    setVerificationStep('sent');
+
+    // Mock Send
+    console.log("--------------------------------");
+    console.log(`[MOCK EMAIL SEND] To: ${formData.email}`);
+    console.log(`[MOCK EMAIL SEND] Verification Code: ${code}`);
+    console.log("--------------------------------");
+    alert(`Testing Mode: Verification code is ${code}`);
+  };
+
+  const handleConfirmCode = () => {
+    if (verificationCodeInput === generatedCode) {
+      setEmailVerified(true);
+      setVerificationStep('verified');
+      setVerificationCodeInput('');
+      alert("Email verified successfully!");
+    } else {
+      alert("Incorrect code. Please try again.");
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -138,17 +165,59 @@ export default function ContactPage() {
 
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-bold uppercase tracking-wider text-gray-700">Email Address</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
-                    placeholder="your@email.com"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      disabled={emailVerified}
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors ${emailVerified ? 'bg-gray-100 text-gray-500' : ''}`}
+                      placeholder="your@email.com"
+                    />
+                    {!emailVerified ? (
+                      <button
+                        type="button"
+                        onClick={handleVerifyEmail}
+                        className="bg-black text-white px-6 font-bold uppercase tracking-wider text-sm hover:bg-gray-900 transition-colors whitespace-nowrap"
+                      >
+                        Verify
+                      </button>
+                    ) : (
+                      <div className="flex items-center px-4 bg-green-50 border border-green-200 text-green-700 font-bold uppercase tracking-wider text-xs whitespace-nowrap">
+                        Verified
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* Email Verification Code Input */}
+                {verificationStep === 'sent' && (
+                  <div className="space-y-2 bg-gray-100 p-4 rounded border border-gray-200 animate-fadeIn">
+                    <label htmlFor="code" className="text-sm font-bold uppercase tracking-wider text-gray-700">Enter Verification Code</label>
+                    <p className="text-xs text-gray-500 mb-2">A 6-digit code has been sent to your email.</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        id="code"
+                        value={verificationCodeInput}
+                        onChange={(e) => setVerificationCodeInput(e.target.value)}
+                        className="w-full px-4 py-2 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
+                        placeholder="123456"
+                        maxLength={6}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleConfirmCode}
+                        className="bg-black text-white px-6 font-bold uppercase tracking-wider text-sm hover:bg-gray-900 transition-colors"
+                      >
+                        Confirm
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label htmlFor="phone" className="text-sm font-bold uppercase tracking-wider text-gray-700">Phone (Optional)</label>
@@ -156,10 +225,11 @@ export default function ContactPage() {
                     type="tel"
                     id="phone"
                     name="phone"
+                    disabled={!emailVerified}
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
-                    placeholder="(555) 555-5555"
+                    className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`}
+                    placeholder={!emailVerified ? "Verify email to unlock" : "(555) 555-5555"}
                   />
                 </div>
 
@@ -169,11 +239,12 @@ export default function ContactPage() {
                     id="message"
                     name="message"
                     required
+                    disabled={!emailVerified}
                     rows={5}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors resize-none"
-                    placeholder="How can we help you?"
+                    className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors resize-none ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`}
+                    placeholder={!emailVerified ? "Verify email to unlock" : "How can we help you?"}
                   />
                 </div>
 
@@ -186,11 +257,12 @@ export default function ContactPage() {
                         name="consent"
                         type="checkbox"
                         checked={consentChecked}
+                        disabled={!formData.message || formData.message.length === 0}
                         onChange={(e) => setConsentChecked(e.target.checked)}
-                        className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black"
+                        className={`h-4 w-4 text-black border-gray-300 rounded focus:ring-black ${(!formData.message || formData.message.length === 0) ? 'cursor-not-allowed opacity-50' : ''}`}
                       />
                     </div>
-                    <div className="text-sm">
+                    <div className={`text-sm ${(!formData.message || formData.message.length === 0) ? 'opacity-50' : ''}`}>
                       <label htmlFor="consent" className="font-bold text-gray-900 block mb-1">
                         I consent to receive text messages and phone calls.
                       </label>
@@ -201,35 +273,12 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                {/* CAPTCHA Verification */}
-                <div className="space-y-4 pt-4 border-t border-gray-100">
-                  <label className="text-sm font-bold uppercase tracking-wider text-gray-700">Verification</label>
-                  <div className="flex items-center space-x-4">
-                    {/* Display Random Number */}
-                    <div className="bg-gray-100 border border-gray-300 px-6 py-2 rounded text-xl font-mono font-bold tracking-widest text-gray-700 select-none">
-                      {captchaTarget}
-                    </div>
-                    {/* User Input */}
-                    <input
-                      type="text"
-                      value={captchaInput}
-                      onChange={(e) => setCaptchaInput(e.target.value)}
-                      placeholder="Enter number"
-                      maxLength={4}
-                      className="w-40 px-4 py-2 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Please enter the number above to verify you are human.
-                  </p>
-                </div>
-
                 <button
                   type="submit"
-                  disabled={!consentChecked || captchaInput !== captchaTarget?.toString()}
-                  className={`w-full py-4 font-bold uppercase tracking-widest transition-colors ${(!consentChecked || captchaInput !== captchaTarget?.toString())
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-black text-white hover:bg-gray-900'
+                  disabled={!consentChecked}
+                  className={`w-full py-4 font-bold uppercase tracking-widest transition-colors ${!consentChecked
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-black text-white hover:bg-gray-900'
                     }`}
                 >
                   Send Message
@@ -247,7 +296,13 @@ export default function ContactPage() {
                   Thank you for reaching out. We'll get back to you as soon as possible.
                 </p>
                 <button
-                  onClick={() => setSubmitted(false)}
+                  onClick={() => {
+                    setSubmitted(false);
+                    setEmailVerified(false);
+                    setVerificationStep('idle');
+                    setFormData({ name: '', email: '', phone: '', message: '' });
+                    setConsentChecked(false);
+                  }}
                   className="mt-8 text-sm font-medium text-black border-b border-black pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors"
                 >
                   Send another message
