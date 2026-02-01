@@ -2,11 +2,35 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Hero = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [bgImage, setBgImage] = useState("/hero-bg.png");
+
+  useEffect(() => {
+    const heroImages = [
+      '/hero-bg.png',
+      '/images/hero-bg-1.png',
+      '/images/hero-bg-2.png',
+      '/images/hero-bg-3.png',
+      '/images/hero-bg-4.png',
+      '/images/hero-bg-5.png',
+      '/images/hero-bg-6.png',
+      '/images/hero-bg-7.png',
+      '/images/hero-bg-8.png',
+      '/images/hero-bg-9.png',
+      '/images/hero-bg-10.png',
+      '/images/hero-bg-11.png',
+      '/images/hero-bg-12.png',
+      '/images/hero-bg-13.png',
+      '/images/hero-bg-14.png',
+    ];
+    const randomImage = heroImages[Math.floor(Math.random() * heroImages.length)];
+    setBgImage(randomImage);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +46,7 @@ const Hero = () => {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/hero-bg.png"
+          src={bgImage}
           alt="Luxury Interior"
           fill
           className="object-cover brightness-75"
