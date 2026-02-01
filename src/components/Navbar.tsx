@@ -59,7 +59,7 @@ const Navbar = () => {
           </div>
           <div className="flex flex-col">
             <span className={`text-xl font-bold tracking-widest uppercase ${isScrolled ? 'text-black' : 'text-white'}`}>
-              NJ Eunice
+              Eunice
             </span>
             <span className={`text-[10px] tracking-widest uppercase ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
               BEST REALTOR
