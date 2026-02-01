@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NJ Eunice's Real Estate Web Platform",
+  title: "NJ Eunice - RE/MAX NOW",
   description: "Advanced Real Estate Platform for New Jersey",
 };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
@@ -46,9 +47,24 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold tracking-widest uppercase">
-          <span className={isScrolled ? 'text-black' : 'text-white'}>NJ Eunice's</span>
-          <span className="text-gray-500 ml-2">Real Estate</span>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative w-[129px] h-10">
+            <Image
+              src="/images/remax_now_Increase2.svg"
+              alt="RE/MAX NOW"
+              fill
+              className="object-contain object-left"
+              priority
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className={`text-xl font-bold tracking-widest uppercase ${isScrolled ? 'text-black' : 'text-white'}`}>
+              NJ Eunice
+            </span>
+            <span className={`text-[10px] tracking-widest uppercase ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
+              BEST REALTOR
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Menu */}

@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[23%_15%_27%_35%] gap-8">
           {/* Brand & Address */}
           <div className="space-y-4 pr-4">
-            <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice's Real Estate</h3>
+            <h3 className="text-2xl font-bold tracking-widest uppercase">NJ Eunice</h3>
             <div className="pt-6 relative h-20 w-64 max-w-full">
               <Image
                 src="/images/footer_banner.png"
@@ -80,7 +80,7 @@ const Footer = () => {
         {/* Bottom Bar - Legal Links */}
         <div className="grid grid-cols-1 lg:grid-cols-[23%_15%_27%_35%] gap-8 text-[10px] text-gray-500">
           <div className="lg:col-span-1 flex items-center">
-            <p>&copy; {new Date().getFullYear()} NJ Eunice's Real Estate. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} NJ Eunice. All rights reserved.</p>
           </div>
 
           <div className="lg:col-span-3 flex flex-nowrap whitespace-nowrap gap-x-3 items-center justify-end overflow-visible">
