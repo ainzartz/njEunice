@@ -13,7 +13,7 @@ export default function AboutPage() {
           <Image
             // Using a placeholder or potentially the same hero bg for now 
             // Ideally we'd have a specific different image
-            src="/hero-bg.png"
+            src="/images/hero-bg.png"
             alt="New Jersey Skyline"
             fill
             className="object-cover brightness-50"

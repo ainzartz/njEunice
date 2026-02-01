@@ -5,7 +5,12 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-const Navbar = () => {
+
+interface NavbarProps {
+  theme?: 'transparent' | 'light';
+}
+
+const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
@@ -40,9 +45,11 @@ const Navbar = () => {
     }
   };
 
+  const isLightMode = theme === 'light' || isScrolled;
+
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'
+      className={`fixed w-full z-50 transition-all duration-300 ${isLightMode ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -58,10 +65,10 @@ const Navbar = () => {
             />
           </div>
           <div className="flex flex-col">
-            <span className={`text-xl font-bold tracking-widest uppercase ${isScrolled ? 'text-black' : 'text-white'}`}>
+            <span className={`text-xl font-bold tracking-widest uppercase ${isLightMode ? 'text-black' : 'text-white'}`}>
               Eunice
             </span>
-            <span className={`text-[10px] tracking-widest uppercase ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
+            <span className={`text-[10px] tracking-widest uppercase ${isLightMode ? 'text-gray-600' : 'text-gray-300'}`}>
               BEST REALTOR
             </span>
           </div>
@@ -76,7 +83,7 @@ const Navbar = () => {
                 key={item}
                 href={href}
                 onClick={(e) => handleLinkClick(e, href)}
-                className={`text-sm font-medium uppercase tracking-wider hover:text-gray-400 transition-colors ${isScrolled ? 'text-black' : 'text-white'
+                className={`text-sm font-medium uppercase tracking-wider hover:text-gray-400 transition-colors ${isLightMode ? 'text-black' : 'text-white'
                   }`}
               >
                 {item}
@@ -87,7 +94,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Button (Hamburger) - Placeholder */}
         <div className="md:hidden">
-          <button className={isScrolled ? 'text-black' : 'text-white'}>
+          <button className={isLightMode ? 'text-black' : 'text-white'}>
             <svg
               className="w-6 h-6"
               fill="none"

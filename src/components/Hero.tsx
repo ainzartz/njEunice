@@ -8,11 +8,11 @@ const Hero = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [bgImage, setBgImage] = useState("/hero-bg.png");
+  const [bgImage, setBgImage] = useState("/images/hero-bg.png");
 
   useEffect(() => {
     const heroImages = [
-      '/hero-bg.png',
+      '/images/hero-bg.png',
       '/images/hero-bg-1.png',
       '/images/hero-bg-2.png',
       '/images/hero-bg-3.png',

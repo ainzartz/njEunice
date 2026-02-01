@@ -1,10 +1,12 @@
+"use client";
+
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
 import Link from 'next/link';
 import ScrollRevealImage from '@/components/ScrollRevealImage';
-
 export default function Home() {
   return (
     <main className="min-h-screen font-sans bg-white selection:bg-black selection:text-white">
@@ -41,8 +43,11 @@ export default function Home() {
             <Link href="/about" className="inline-block px-8 py-3 bg-black text-white font-medium uppercase tracking-widest hover:bg-gray-800 transition-colors text-center">
               More About Eunice
             </Link>
-            <Link href="/market-insights" className="inline-block px-8 py-3 border border-black text-black font-medium uppercase tracking-widest hover:bg-black hover:text-white transition-colors text-center">
-              Realtor's Investment Vision
+            <Link
+              href="/market-insights"
+              className="inline-block px-8 py-3 border border-black text-black font-medium uppercase tracking-widest hover:bg-black hover:text-white transition-colors text-center"
+            >
+              Realtor&apos;s Investment Vision
             </Link>
           </div>
         </div>
@@ -72,6 +77,8 @@ export default function Home() {
       </section>
 
       <Footer />
+
+
     </main>
   );
 }

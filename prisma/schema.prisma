@@ -12,3 +12,10 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model MarketInsight {
+  id        String   @id @default(cuid())
+  contentEn String   // English content
+  contentKo String   // Korean content
+  createdAt DateTime @default(now())
+}
