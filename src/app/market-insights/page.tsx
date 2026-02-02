@@ -75,6 +75,9 @@ export default function MarketInsightsPage() {
           </div>
         ) : insight ? (
           <article className="prose prose-lg prose-gray mx-auto">
+            <div className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-8">
+              Date: {new Date(insight.createdAt).toLocaleDateString("en-US", { timeZone: "America/New_York", year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
 
 
             <div className="markdown-content">
