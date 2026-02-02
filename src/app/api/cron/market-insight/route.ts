@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { generateMarketInsight } from "@/lib/gemini";
-
+export const dynamic = 'force-dynamic';
 
 import prisma from "@/lib/db";
 
