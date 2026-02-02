@@ -17,8 +17,9 @@ export const generateMarketInsight = async () => {
   const model = getGeminiModel();
   const prompt = `
     You are an expert Real Estate Analyst & Investment Advisor for Bergen County, NJ.
+    You are an expert Real Estate Analyst & Investment Advisor for Bergen County, NJ.
     Write a detailed "Daily Investment & Mortgage Update" for today.
-    IMPORTANT: Do NOT include the date (e.g. 2/2/2026) in the main title. The date is already displayed on the website. Simply use a title like "Daily Investment & Mortgage Update: Bergen County, NJ".
+    STRICT INSTRUCTION: Do NOT include a main title or H1/H2 header at the beginning. The website already displays the title. Start directly with the first section (e.g. "### 1. Mortgage Rate Monitor").
 
     You MUST output the response in strictly valid JSON format with the following structure:
     {
