@@ -75,18 +75,26 @@ export default function MarketInsightsPage() {
           </div>
         ) : insight ? (
           <article className="prose prose-lg prose-gray mx-auto">
+            {/* Top Date Display - Restored */}
+            <div className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-2">
+              Date: {new Date(insight.createdAt).toLocaleDateString("en-US", { timeZone: "America/New_York", year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
 
-
+            {/* Static Title - Always Consistent */}
+            <h2 className="text-2xl font-bold mt-2 mb-8 text-black">
+              Daily Investment & Mortgage Update: Bergen County, NJ
+            </h2>
 
             <div className="markdown-content">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
+                  // Ignore H1 from AI to avoid duplication with our static title
+                  h1: ({ node, ...props }) => <></>,
                   table: ({ node, ...props }) => <table className="min-w-full divide-y divide-gray-300 my-4 border border-gray-200" {...props} />,
                   thead: ({ node, ...props }) => <thead className="bg-gray-50" {...props} />,
                   th: ({ node, ...props }) => <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 border-b border-gray-200" {...props} />,
                   td: ({ node, ...props }) => <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 border-b border-gray-100" {...props} />,
-                  h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mt-8 mb-4 border-b pb-2" {...props} />,
                   h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-6 mb-3 text-black" {...props} />,
                   h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mt-4 mb-2" {...props} />,
                   ul: ({ node, ...props }) => <ul className="list-disc list-outside ml-5 space-y-1 mb-4" {...props} />,
