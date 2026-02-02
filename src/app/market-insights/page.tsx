@@ -34,7 +34,7 @@ export default function MarketInsightsPage() {
     <main className="min-h-screen bg-white font-sans selection:bg-black selection:text-white">
       <Navbar theme="light" />
 
-      <section className="pt-32 pb-12 px-6 bg-gray-50 border-b border-gray-200">
+      <section className="pt-32 pb-12 px-6 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-serif text-black mb-6">
             Realtor&apos;s Investment Vision
@@ -75,9 +75,7 @@ export default function MarketInsightsPage() {
           </div>
         ) : insight ? (
           <article className="prose prose-lg prose-gray mx-auto">
-            <div className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-8 border-b pb-4">
-              Date: {new Date(insight.createdAt).toLocaleDateString("en-US", { timeZone: "America/New_York", year: 'numeric', month: 'long', day: 'numeric' })}
-            </div>
+
 
             <div className="markdown-content">
               <ReactMarkdown
@@ -100,12 +98,9 @@ export default function MarketInsightsPage() {
               </ReactMarkdown>
             </div>
 
-            <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between text-xs text-gray-400 bg-gray-50 p-6 rounded-lg">
-              <div className="mb-2 md:mb-0 text-[10px] leading-relaxed text-gray-400 max-w-2xl">
+            <div className="mt-16 pt-8 border-t border-gray-100 text-xs text-gray-400 bg-gray-50 p-6 rounded-lg">
+              <div className="text-[10px] leading-relaxed text-gray-400">
                 <strong>Disclaimer:</strong> The content provided herein is for informational purposes only and does not constitute financial, investment, legal, or tax advice. Market conditions and interest rates are subject to change without notice. While we strive to provide accurate market insights, NJ Eunice Realty makes no representations as to the accuracy or completeness of any information. Please consult with a qualified real estate professional, financial advisor, or attorney before making any real estate investment decisions.
-              </div>
-              <div>
-                &copy; {new Date().getFullYear()} NJ Eunice Realty
               </div>
             </div>
           </article>
