@@ -49,105 +49,45 @@ const getMortgageRates = async () => {
   }
 };
 
+const cleanJson = (text: string): string => {
+  // 1. Remove markdown code blocks
+  let cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  // 2. Remove purely markdown citation markers like [1], [^1] if they leak in
+  cleaned = cleaned.replace(/\[\d+\]/g, '');
+
+  // 3. Attempt to find the specific JSON object structure matching our expected specific keys if possible
+  //    But generally finding the first { and last } is safer for nested content.
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+
+  return cleaned;
+}
+
 export const generateMarketInsight = async () => {
   const model = getGeminiModel();
   const liveRates = await getMortgageRates();
 
   let rateContext = "";
   if (liveRates && liveRates.thirty) {
+    // Clean up rate strings themselves just in case
+    const r30 = liveRates.thirty.rate.trim();
+    const c30 = liveRates.thirty.change.trim();
+    const r15 = liveRates.fifteen?.rate?.trim() || "N/A";
+    const c15 = liveRates.fifteen?.change?.trim() || "N/A";
+
     rateContext = `
-      LIVE DATA (Source: Mortgage News Daily) - USE THESE EXACT NUMBERS:
-      - 30-Year Fixed: ${liveRates.thirty.rate} (Change: ${liveRates.thirty.change})
-      - 15-Year Fixed: ${liveRates.fifteen?.rate || "N/A"} (Change: ${liveRates.fifteen?.change || "N/A"})
-      `;
-  }
-
-  const prompt = `
-    You are an expert Real Estate Analyst & Investment Advisor for Bergen County, NJ.
-    Write a detailed "Daily Investment & Mortgage Update" for today.
-    STRICT INSTRUCTION: Do NOT include a main title or H1/H2 header at the beginning. The website already displays the title. Start directly with the first section (e.g. "### 1. Mortgage Rate Monitor").
-
-    ${rateContext}
-
-    You MUST output the response in strictly valid JSON format with the following structure:
-    {
-      "english": "markdown content here...",
-      "korean": "korean translation of the markdown content here..."
-    }
-
-    Content Requirements (Focus on Bergen County, NJ):
-    1. **Mortgage Rate Monitor**:
-       - Create a Markdown table with EXACTLY these columns: "Loan Type", "Estimated Rate (APR)", "Trend (vs Last Week)".
-       - For "Trend", you MUST compare it to last week (or yesterday) and use specific arrows: "↑ Rising", "↓ Falling", or "→ Stable".
-       - Include 30-year fixed, 15-year fixed, and 5/1 ARM.
-       - IMPORTANT: Use the LIVE DATA provided above for 30-year and 15-year rates. Do not hallunicate different numbers for these. For 5/1 ARM, estimate based on typical spread if not provided.
-       - Briefly comment on the catalyst for this trend (e.g. Fed news, inflation data).
-    
-    2. **Bergen County Investment Vision**:
-       - Analyze the current buying power in towns like Tenafly, Closter, Cresskill, Demarest, Alpine.
-       - Is it a Buyer's or Seller's market right now? Why?
-       - Provide a specific actionable "Investment Opinion" for investors looking at this week.
-
-    3. **Strategic Advice**:
-       - Tip for First-time homebuyers in this rate environment.
-       - Tip for homeowners considering selling.
-
-    Tone:
-    - Highly vivid, professional, and confident.
-    - Use data-driven language but keep it accessible.
-    - Korean translation should be high-quality business formal (polite).
-  `;
-
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    const cleanJson = (text: string): string => {
-      // 1. Remove markdown code blocks
-      let cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
-      // 2. Remove purely markdown citation markers like [1], [^1] if they leak in
-      cleaned = cleaned.replace(/\[\d+\]/g, '');
-
-      // 3. Attempt to find the specific JSON object structure matching our expected specific keys if possible
-      //    But generally finding the first { and last } is safer for nested content.
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-
-      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
-      }
-
-      // 4. Sanitize newlines inside strings if they are actual line breaks instead of \n
-      // This is a common issue where the model outputs: "content": "Line 1
-      // Line 2" which is invalid JSON.
-      // However, regex replacing that safely is hard without a parser.
-      // We'll rely on the model obeying structure mostly, but we can try basic fixes.
-
-      return cleaned;
-    }
-
-    export const generateMarketInsight = async () => {
-      const model = getGeminiModel();
-      const liveRates = await getMortgageRates();
-
-      let rateContext = "";
-      if (liveRates && liveRates.thirty) {
-        // Clean up rate strings themselves just in case
-        const r30 = liveRates.thirty.rate.trim();
-        const c30 = liveRates.thirty.change.trim();
-        const r15 = liveRates.fifteen?.rate?.trim() || "N/A";
-        const c15 = liveRates.fifteen?.change?.trim() || "N/A";
-
-        rateContext = `
       LIVE DATA (Source: Mortgage News Daily) - USE THESE EXACT NUMBERS:
       - 30-Year Fixed: "${r30}" (Change: "${c30}")
       - 15-Year Fixed: "${r15}" (Change: "${c15}")
       `;
-      }
+  }
 
-      const prompt = `
+  const prompt = `
     You are an expert Real Estate Analyst & Investment Advisor for Bergen County, NJ.
     Write a detailed "Daily Investment & Mortgage Update" for today.
     STRICT INSTRUCTION: Do NOT include a main title or H1/H2 header at the beginning. The website already displays the title. Start directly with the first section (e.g. "### 1. Mortgage Rate Monitor").
@@ -184,18 +124,16 @@ export const generateMarketInsight = async () => {
     - Ensure all JSON strings are valid (no invalid control characters).
   `;
 
-      try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-        const jsonString = cleanJson(text);
+    const jsonString = cleanJson(text);
 
-        return JSON.parse(jsonString);
-      } catch (error) {
-        console.error("Error generating market insight:", error);
-        // In production, we might want to return a fallback or re-throw
-        // Throwing preserves the original behavior so Vercel logs it
-        throw error;
-      }
-    };
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Error generating market insight:", error);
+    throw error;
+  }
+};
