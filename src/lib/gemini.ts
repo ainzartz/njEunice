@@ -50,8 +50,14 @@ export const generateMarketInsight = async () => {
     const response = await result.response;
     const text = response.text();
 
-    // Clean up potential markdown formatting in the response (e.g. ```json ... ```)
-    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    // clean up potential markdown formatting
+    let jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    // Attempt to extract JSON if there's extra text
+    const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonString = jsonMatch[0];
+    }
 
     return JSON.parse(jsonString);
   } catch (error) {
