@@ -74,7 +74,7 @@ export default function MarketInsightsPage() {
             <p className="text-sm text-gray-500 animate-pulse">Loading daily insights...</p>
           </div>
         ) : insight ? (
-          <article className="prose prose-lg prose-gray mx-auto prose-p:text-black prose-li:text-black prose-headings:text-black prose-strong:text-black prose-strong:font-extrabold">
+          <article className="prose prose-lg mx-auto prose-p:text-black prose-li:text-black prose-headings:text-black prose-strong:text-black prose-strong:font-extrabold text-black">
             {/* Top Date Display - Restored */}
             <div className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-2">
               Date: {new Date(insight.createdAt).toLocaleDateString("en-US", { timeZone: "America/New_York", year: 'numeric', month: 'long', day: 'numeric' })}
@@ -99,7 +99,9 @@ export default function MarketInsightsPage() {
                   h3: ({ node, ...props }) => <h3 className="text-lg font-bold mt-4 mb-2 text-black" {...props} />,
                   ul: ({ node, ...props }) => <ul className="list-disc list-outside ml-5 space-y-1 mb-4 text-black" {...props} />,
                   ol: ({ node, ...props }) => <ol className="list-decimal list-outside ml-5 space-y-1 mb-4 text-black" {...props} />,
-                  li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                  li: ({ node, ...props }) => <li className="pl-1 text-black" {...props} />,
+                  p: ({ node, ...props }) => <p className="text-black mb-4 leading-relaxed" {...props} />,
+                  strong: ({ node, ...props }) => <strong className="text-black font-extrabold" {...props} />,
                   blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-900 pl-4 italic my-4 text-black font-medium" {...props} />,
                 }}
               >
