@@ -54,6 +54,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Market insight generated successfully", data: newInsight });
   } catch (error) {
     console.error("Cron job error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Server Error", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
