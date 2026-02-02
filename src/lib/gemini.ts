@@ -16,23 +16,33 @@ export const getGeminiModel = () => {
 export const generateMarketInsight = async () => {
   const model = getGeminiModel();
   const prompt = `
-    You are an expert Real Estate Analyst for Bergen County, NJ.
-    Write a daily "Realtor's Investment Vision" post for today (${new Date().toLocaleDateString()}).
-    
+    You are an expert Real Estate Analyst & Investment Advisor for Bergen County, NJ.
+    Write a detailed "Daily Investment & Mortgage Update" for today (${new Date().toLocaleDateString()}).
+
     You MUST output the response in strictly valid JSON format with the following structure:
     {
       "english": "markdown content here...",
       "korean": "korean translation of the markdown content here..."
     }
 
-    Content Requirements for both versions:
-    1. **Market Snapshot**: Current mortgage rates (30-year fixed, 15-year fixed) - estimate based on recent trends. Mention specific towns like Tenafly, Cresskill, Closter.
-    2. **Price Trends**: Upward/downward pressure in Bergen County luxury market.
-    3. **Investment Opportunity**: Where is the "smart money" going right now?
-    4. **Realtor's Advice**: A actionable tip for buyers or sellers today.
+    Content Requirements (Focus on Bergen County, NJ):
+    1. **Mortgage Rate Monitor**:
+       - Provide TODAY's estimated mortgage interest rates for 30-year fixed, 15-year fixed, and ARM.
+       - Comment on the trend (Rising/Falling/Stable) compared to last week.
     
-    Tone: Professional, insightful, encouraging, yet realistic. 
-    Keep it concise. Ensure the Korean translation is natural and professional (polite formal tone).
+    2. **Bergen County Investment Vision**:
+       - Analyze the current buying power in towns like Tenafly, Closter, Cresskill, Demarest, Alpine.
+       - Is it a Buyer's or Seller's market right now? Why?
+       - Provide a specific actionable "Investment Opinion" for investors looking at this week.
+
+    3. **Strategic Advice**:
+       - Tip for First-time homebuyers in this rate environment.
+       - Tip for homeowners considering selling.
+
+    Tone:
+    - Highly vivid, professional, and confident.
+    - Use data-driven language but keep it accessible.
+    - Korean translation should be high-quality business formal (polite).
   `;
 
   try {

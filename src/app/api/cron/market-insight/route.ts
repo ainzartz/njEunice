@@ -16,23 +16,27 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // 1. Check if an insight already exists for today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // 1. Check if an insight already exists for today (unless forced)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
 
-    const existingInsight = await prisma.marketInsight.findFirst({
-      where: {
-        createdAt: {
-          gte: today,
-          lt: tomorrow,
+    const isForced = req.nextUrl.searchParams.get("force") === "true";
+
+    if (!isForced) {
+      const existingInsight = await prisma.marketInsight.findFirst({
+        where: {
+          createdAt: {
+            gte: startOfDay,
+            lt: endOfDay,
+          },
         },
-      },
-    });
+      });
 
-    if (existingInsight) {
-      return NextResponse.json({ message: "Insight already exists for today", data: existingInsight });
+      if (existingInsight) {
+        return NextResponse.json({ message: "Insight already exists for today" }, { status: 200 });
+      }
     }
 
     // 2. Generate new insight
