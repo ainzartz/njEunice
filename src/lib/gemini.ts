@@ -10,7 +10,7 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const getGeminiModel = () => {
-  return genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+  return genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 };
 
 export const generateMarketInsight = async () => {
