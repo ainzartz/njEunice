@@ -29,8 +29,10 @@ export const generateMarketInsight = async () => {
 
     Content Requirements (Focus on Bergen County, NJ):
     1. **Mortgage Rate Monitor**:
-       - Provide TODAY's estimated mortgage interest rates for 30-year fixed, 15-year fixed, and ARM.
-       - Comment on the trend (Rising/Falling/Stable) compared to last week.
+       - Create a Markdown table with EXACTLY these columns: "Loan Type", "Estimated Rate (APR)", "Trend (vs Last Week)".
+       - For "Trend", you MUST compare it to last week (or yesterday) and use specific arrows: "↑ Rising", "↓ Falling", or "→ Stable".
+       - Include 30-year fixed, 15-year fixed, and 5/1 ARM.
+       - Briefly comment on the catalyst for this trend (e.g. Fed news, inflation data).
     
     2. **Bergen County Investment Vision**:
        - Analyze the current buying power in towns like Tenafly, Closter, Cresskill, Demarest, Alpine.
