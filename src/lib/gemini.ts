@@ -108,10 +108,19 @@ export const generateMarketInsight = async () => {
        - IMPORTANT: Use the LIVE DATA provided above for 30-year and 15-year rates. Do not hallunicate different numbers for these. For 5/1 ARM, estimate based on typical spread if not provided.
        - Briefly comment on the catalyst for this trend (e.g. Fed news, inflation data).
     
-    2. **Bergen County Investment Vision**:
-       - Analyze the current buying power in towns like Tenafly, Closter, Cresskill, Demarest, Alpine.
-       - Is it a Buyer's or Seller's market right now? Why?
-       - Provide a specific actionable "Investment Opinion" for investors looking at this week.
+    2. **Bergen County Regional Market Pulse**:
+       - Instead of focusing on just one area, analyze Key Regions of Bergen County.
+       - Group major towns into meaningful clusters, for example:
+         * **Northern Valley**: (Tenafly, Closter, Cresskill, Demarest, Alpine, Haworth)
+         * **Pascack Valley**: (Woodcliff Lake, Hillsdale, River Vale, Westwood)
+         * **Gold Coast / Waterfront**: (Edgewater, Fort Lee, Cliffside Park)
+         * **Northwest Bergen**: (Ridgewood, Ho-Ho-Kus, Saddle River, Franklin Lakes, Wyckoff)
+         * **Central Bergen**: (Paramus, Oradell, River Edge)
+       - Select 3-4 distinct regions to highlight today (rotate focus if possible, but cover diverse areas).
+       - For EACH selected region, provide:
+         * **Market Mood**: Buyer's vs Seller's Market status.
+         * **Key Trend**: What is happening with inventory or pricing?
+         * **Actionable Advice**: Special tip for investors or sellers in this specific zone.
 
     3. **Strategic Advice**:
        - Tip for First-time homebuyers in this rate environment.
