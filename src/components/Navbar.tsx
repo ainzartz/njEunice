@@ -35,11 +35,8 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
         const element = document.getElementById('about');
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
-          // Update URL without jump if desired, or just let it be.
-          // window.history.pushState({}, '', '/#about');
         }
       } else {
-        // If not on home, just follow the link which will load home and scroll (handled by css smooth scroll)
         window.location.href = '/#about';
       }
     }
@@ -56,6 +53,7 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <div className="relative w-[129px] h-10">
+            {/* If logo is white-only, invert filter can help in light mode. If colored, leave as is. Assuming colored. */}
             <Image
               src="/images/remax_now_Increase2.svg"
               alt="RE/MAX NOW"
@@ -65,10 +63,10 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
             />
           </div>
           <div className="flex flex-col">
-            <span className={`text-xl font-bold tracking-widest uppercase ${isLightMode ? 'text-black' : 'text-white'}`}>
+            <span className={`text-xl font-bold tracking-widest uppercase ${isLightMode ? '!text-black' : 'text-white'}`}>
               Eunice
             </span>
-            <span className={`text-[10px] tracking-widest uppercase ${isLightMode ? 'text-gray-600' : 'text-gray-300'}`}>
+            <span className={`text-[10px] tracking-widest uppercase ${isLightMode ? '!text-gray-600' : 'text-gray-300'}`}>
               BEST REALTOR
             </span>
           </div>
@@ -83,7 +81,7 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
                 key={item}
                 href={href}
                 onClick={(e) => handleLinkClick(e, href)}
-                className={`text-sm font-medium uppercase tracking-wider hover:text-gray-400 transition-colors ${isLightMode ? 'text-black' : 'text-white'
+                className={`text-sm font-medium uppercase tracking-wider hover:text-gray-400 transition-colors ${isLightMode ? '!text-black' : 'text-white'
                   }`}
               >
                 {item}
@@ -94,7 +92,7 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
 
         {/* Mobile Menu Button (Hamburger) - Placeholder */}
         <div className="md:hidden">
-          <button className={isLightMode ? 'text-black' : 'text-white'}>
+          <button className={isLightMode ? '!text-black' : 'text-white'}>
             <svg
               className="w-6 h-6"
               fill="none"
