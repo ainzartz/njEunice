@@ -31,22 +31,25 @@ export class NJMLSService {
     return new Promise((resolve, reject) => {
       const urlObj = new URL(url);
 
+      // Explicitly type headers to allow dynamic assignment
+      const requestHeaders: Record<string, string | number | string[]> = {
+        'User-Agent': 'RETS-Client/1.0',
+        'RETS-Version': 'RETS/1.8',
+        ...headers
+      };
+
+      // Add Basic Auth if no cookies / initial login
+      if (!headers['Cookie']) {
+        requestHeaders['Authorization'] = 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64');
+      }
+
       const options = {
         hostname: urlObj.hostname,
         port: 443,
         path: urlObj.pathname + urlObj.search,
         method: method,
-        headers: {
-          'User-Agent': 'RETS-Client/1.0',
-          'RETS-Version': 'RETS/1.8', // Common default
-          ...headers
-        }
+        headers: requestHeaders
       };
-
-      // Add Basic Auth if no cookies / initial login
-      if (!headers['Cookie']) {
-        options.headers['Authorization'] = 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64');
-      }
 
       console.log(`[NJMLS] Request: ${method} ${url}`);
 
