@@ -1,11 +1,10 @@
-import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-
-export default function AboutPage() {
+import { getCurrentUser } from '@/lib/auth-server';
+// ...
+export default async function AboutPage() {
+  const user = await getCurrentUser();
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
+      <Navbar user={user} />
 
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center">

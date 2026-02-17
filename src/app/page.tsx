@@ -1,16 +1,16 @@
-"use client";
-
-import { useState } from 'react';
+import { getCurrentUser } from '@/lib/auth-server';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
 import Link from 'next/link';
 import ScrollRevealImage from '@/components/ScrollRevealImage';
-export default function Home() {
+
+export default async function Home() {
+  const user = await getCurrentUser();
   return (
     <main className="min-h-screen font-sans bg-white selection:bg-black selection:text-white">
-      <Navbar />
+      <Navbar user={user} />
       <Hero />
 
       {/* Realtor Bio Section */}

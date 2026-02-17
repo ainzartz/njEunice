@@ -8,9 +8,14 @@ import { useState, useEffect } from 'react';
 
 interface NavbarProps {
   theme?: 'transparent' | 'light';
+  user?: {
+    firstName: string | null;
+    email: string;
+    isAdmin: boolean;
+  } | null;
 }
 
-const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
+const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
@@ -43,6 +48,8 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
   };
 
   const isLightMode = theme === 'light' || isScrolled;
+
+
 
   return (
     <nav
@@ -88,6 +95,38 @@ const Navbar = ({ theme = 'transparent' }: NavbarProps) => {
               </Link>
             );
           })}
+
+          {/* User Profile / Logout */}
+          {user ? (
+            <div className="relative group">
+              <button
+                className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 ${isLightMode ? '!text-black' : 'text-white'}`}
+              >
+                {user.firstName || user.email.split('@')[0]}
+              </button>
+              {/* Dropdown */}
+              <div className="absolute right-0 top-full pt-2 w-48 hidden group-hover:block">
+                <div className="bg-white text-black shadow-lg rounded-md overflow-hidden border border-gray-200">
+                  <Link
+                    href="/profile"
+                    className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors uppercase tracking-wider text-gray-800"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      fetch('/api/auth/logout', { method: 'POST' }).then(() => {
+                        window.location.href = '/';
+                      });
+                    }}
+                    className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors uppercase tracking-wider text-gray-800"
+                  >
+                    Log out
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Mobile Menu Button (Hamburger) - Placeholder */}
