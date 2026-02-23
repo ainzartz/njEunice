@@ -11,10 +11,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase().trim();
 
-    if (!user) {
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+    if (!user || user.isDeleted) {
       // Return success even if user not found to prevent enumeration
+      // Also silently ignore deleted users
       return NextResponse.json({ success: true, message: 'If account exists, reset link sent.' });
     }
 
@@ -31,7 +34,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Send Email
-    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password?token=${token}`;
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const resetLink = `${origin}/auth/reset-password?token=${token}`;
     const html = `
       <h1>Password Reset Request</h1>
       <p>You requested a password reset because your password expired or you forgot it.</p>
@@ -44,8 +48,7 @@ export async function POST(request: NextRequest) {
       await sendEmail(user.email, 'Password Reset Request', html);
     } catch (e) {
       console.error("Failed to send email:", e);
-      // In production, we might want to throw error or handle it 
-      // return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to deliver email. Please try again later.' }, { status: 500 });
     }
 
     // Send SMS (Mock)
