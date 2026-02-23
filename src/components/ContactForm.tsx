@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Consent State
   const [consentChecked, setConsentChecked] = useState(false);
@@ -54,7 +56,8 @@ export default function ContactForm() {
       return;
     }
 
-    setResendCountdown(15);
+    setVerificationStep('sent');
+    setResendCountdown(60);
 
     try {
       const response = await fetch('/api/email/verify', {
@@ -69,21 +72,26 @@ export default function ContactForm() {
 
       if (data.success) {
         setServerCodeHash(data.hash);
-        setVerificationStep('sent');
-        alert("Verification code sent to " + formData.email);
       } else {
         alert("Failed to send email: " + (data.error || "Unknown error"));
+        setVerificationStep('idle');
         setResendCountdown(0); // Reset timer on failure
       }
     } catch (error) {
       console.error("Error verifying email:", error);
       alert("An error occurred. Please try again.");
+      setVerificationStep('idle');
       setResendCountdown(0);
     }
   };
 
   const handleConfirmCode = async () => {
     if (!verificationCodeInput) return;
+
+    if (!serverCodeHash) {
+      alert("Please wait a moment while the email is being sent.");
+      return;
+    }
 
     const inputHash = await sha256(verificationCodeInput);
 
@@ -98,11 +106,34 @@ export default function ContactForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate form submission
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
+    if (!consentChecked || !emailVerified) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSubmitted(true);
+      } else {
+        alert(data.error || 'Failed to send message. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,18 +142,33 @@ export default function ContactForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <h3 className="text-2xl font-bold uppercase tracking-wider mb-6">Send a Message</h3>
 
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-bold uppercase tracking-wider text-gray-700">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
-              placeholder="Your Name"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wider text-gray-700">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                required
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
+                placeholder="First Name"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="lastName" className="text-sm font-bold uppercase tracking-wider text-gray-700">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                required
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
+                placeholder="Last Name"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -136,7 +182,7 @@ export default function ContactForm() {
                 disabled={emailVerified}
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors ${emailVerified ? 'bg-gray-100 text-gray-500' : ''}`}
+                className={`flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors ${emailVerified ? 'bg-gray-100 text-gray-500' : ''}`}
                 placeholder="your@email.com"
               />
               {!emailVerified ? (
@@ -144,7 +190,7 @@ export default function ContactForm() {
                   type="button"
                   onClick={handleVerifyEmail}
                   disabled={resendCountdown > 0 || !formData.email}
-                  className={`px-6 font-bold uppercase tracking-wider text-sm transition-colors whitespace-nowrap min-w-[120px] ${resendCountdown > 0 || !formData.email
+                  className={`flex-shrink-0 px-4 sm:px-6 font-bold uppercase tracking-wider text-sm transition-colors whitespace-nowrap min-w-[100px] sm:min-w-[140px] ${resendCountdown > 0 || !formData.email
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-black text-white hover:bg-gray-900'
                     }`}
@@ -243,13 +289,13 @@ export default function ContactForm() {
 
           <button
             type="submit"
-            disabled={!consentChecked}
-            className={`w-full py-4 font-bold uppercase tracking-widest transition-colors ${!consentChecked
+            disabled={!consentChecked || isSubmitting}
+            className={`w-full py-4 font-bold uppercase tracking-widest transition-colors ${(!consentChecked || isSubmitting)
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-black text-white hover:bg-gray-900'
               }`}
           >
-            Send Message
+            {isSubmitting ? 'Sending...' : 'Send Message'}
           </button>
         </form>
       ) : (
@@ -268,7 +314,7 @@ export default function ContactForm() {
               setSubmitted(false);
               setEmailVerified(false);
               setVerificationStep('idle');
-              setFormData({ name: '', email: '', phone: '', message: '' });
+              setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
               setConsentChecked(false);
             }}
             className="mt-8 text-sm font-medium text-black border-b border-black pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors"

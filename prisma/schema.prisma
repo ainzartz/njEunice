@@ -23,7 +23,7 @@ model MarketInsight {
 model User {
   id               String               @id @default(cuid())
   email            String               @unique
-  passwordHash     String
+  passwordHash     String?
   firstNameEncrypted String @default("")
   lastNameEncrypted  String @default("")
   nameEncrypted      String?
@@ -33,14 +33,17 @@ model User {
   autoEmail        Boolean              @default(false)
   autoSms          Boolean              @default(false)
   isAdmin          Boolean              @default(false)
+  isLogin          Boolean              @default(false)
   lastLoginAt      DateTime?
   resetToken       String?              @unique
   resetTokenExpiry DateTime?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-  interestRegions  UserInterestRegion[]
+  interestCities   UserInterestCity[]
   lastPasswordChangeAt DateTime? @default(now())
   passwordHistory      PasswordHistory[]
+  isDeleted            Boolean              @default(false)
+  messages             Message[]
 
   @@map("users")
 }
@@ -56,24 +59,48 @@ model PasswordHistory {
   @@map("password_history")
 }
 
-model RegionCode {
-  code            String               @id
-  description     String
+model County {
+  id       String    @id @default(cuid())
+  name     String
+  state    String    @default("NJ")
+  isTarget Boolean   @default(false)
+  cities   City[]
+}
+
+model City {
+  id              String             @id @default(cuid())
+  name            String
+  countyId        String
+  county          County             @relation(fields: [countyId], references: [id])
   zipCodes        ZipCode[]
-  interestedUsers UserInterestRegion[]
+  interestedUsers UserInterestCity[]
+
+  @@unique([name, countyId])
 }
 
 model ZipCode {
-  code       String     @id
-  regionCode String
-  region     RegionCode @relation(fields: [regionCode], references: [code])
+  code   String @id
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id])
 }
 
-model UserInterestRegion {
-  userId     String
-  regionCode String
-  user       User       @relation(fields: [userId], references: [id])
-  region     RegionCode @relation(fields: [regionCode], references: [code])
+model UserInterestCity {
+  userId String
+  cityId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
-  @@id([userId, regionCode])
+  @@id([userId, cityId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String   @db.Text
+  isInbound Boolean  @default(true) // true if message from user to admin, false if admin to user
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("messages")
 }

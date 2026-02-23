@@ -10,6 +10,7 @@ interface NavbarProps {
   theme?: 'transparent' | 'light';
   user?: {
     firstName: string | null;
+    lastName: string | null;
     email: string;
     isAdmin: boolean;
   } | null;
@@ -53,7 +54,7 @@ const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${isLightMode ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isLightMode ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -102,7 +103,7 @@ const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
               <button
                 className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 ${isLightMode ? '!text-black' : 'text-white'}`}
               >
-                {user.firstName || user.email.split('@')[0]}
+                {(user.firstName || user.lastName) ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : user.email.split('@')[0]}
               </button>
               {/* Dropdown */}
               <div className="absolute right-0 top-full pt-2 w-48 hidden group-hover:block">
@@ -113,6 +114,14 @@ const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
                   >
                     Profile
                   </Link>
+                  {user.isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors uppercase tracking-wider text-gray-800"
+                    >
+                      Administrator
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       fetch('/api/auth/logout', { method: 'POST' }).then(() => {
