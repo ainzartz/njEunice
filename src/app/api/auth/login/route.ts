@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword } from '@/lib/auth';
 import { signToken } from '@/lib/jwt';
+import { decrypt } from '@/lib/encryption';
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,12 +61,15 @@ export async function POST(request: NextRequest) {
       mustChangePassword = true;
     }
 
+    const decryptedFirstName = user.firstNameEncrypted ? decrypt(user.firstNameEncrypted) : '';
+    const decryptedLastName = user.lastNameEncrypted ? decrypt(user.lastNameEncrypted) : '';
+
     const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        name: `${decryptedFirstName} ${decryptedLastName}`.trim(),
         role: user.isAdmin ? 'ADMIN' : 'USER'
       },
       mustChangePassword,

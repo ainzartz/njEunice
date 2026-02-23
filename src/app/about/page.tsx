@@ -1,5 +1,7 @@
 import { getCurrentUser } from '@/lib/auth-server';
-// ...
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import Image from 'next/image';
 export default async function AboutPage() {
   const user = await getCurrentUser();
   return (

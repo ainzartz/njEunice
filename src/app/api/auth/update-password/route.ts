@@ -38,6 +38,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    if (!user.passwordHash) {
+      return NextResponse.json({ error: 'User does not have a password set' }, { status: 400 });
+    }
+
     // Verify current password
     const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isPasswordValid) {
@@ -63,6 +67,7 @@ export async function POST(request: Request) {
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const currentHashed = user.passwordHash;
 
     // Transaction
     await prisma.$transaction(async (tx) => {
@@ -70,7 +75,7 @@ export async function POST(request: Request) {
       await tx.passwordHistory.create({
         data: {
           userId: userId,
-          passwordHash: user.passwordHash,
+          passwordHash: currentHashed,
         }
       });
 
