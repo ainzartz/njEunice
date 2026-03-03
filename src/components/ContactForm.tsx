@@ -36,7 +36,13 @@ export default function ContactForm() {
   }, [resendCountdown]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    // Only allow numbers for phone field
+    if (name === 'phone') {
+      value = value.replace(/\D/g, '');
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -100,7 +106,6 @@ export default function ContactForm() {
       setVerificationStep('verified');
       setVerificationCodeInput('');
       setResendCountdown(0);
-      alert("Email verified successfully!");
     } else {
       alert("Incorrect code. Please try again.");
     }
@@ -118,7 +123,10 @@ export default function ContactForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          consent: consentChecked
+        }),
       });
 
       const data = await response.json();

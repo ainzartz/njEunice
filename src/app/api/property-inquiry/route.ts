@@ -6,7 +6,7 @@ import { encrypt } from '@/lib/encryption';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { firstName, lastName, email, phone, message, consent } = data;
+    const { firstName, lastName, email, phone, message, propertyAddress, propertyMlsId, propertyZip, consent } = data;
 
     if (!firstName || !lastName || !email || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      // Auto-register new user
+      // Auto-register new guest user
       const firstNameEncrypted = encrypt(firstName);
       const lastNameEncrypted = encrypt(lastName);
       const nameEncrypted = encrypt(`${firstName} ${lastName}`.trim());
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         },
       });
     } else if (consent === true) {
-      // Update existing user with consent 
+      // Update existing user with consent if they didn't have it
       user = await prisma.user.update({
         where: { id: user.id },
         data: {
@@ -55,15 +55,53 @@ export async function POST(request: Request) {
     }
 
     // 2. Save the message to the database
+    // Prepend property details so admins know which listing this inquiry is about
+    const fullMessageContent = `[Inquiry for Property: ${propertyAddress} (MLS# ${propertyMlsId || 'Unknown'})]\n\n${message}`;
+
     await prisma.message.create({
       data: {
         userId: user.id,
-        content: message,
-        isInbound: true, // Message from user to admin
+        content: fullMessageContent,
+        isInbound: true,
       },
     });
 
-    // 3. Notify all active administrators
+    // 3. Optional: Map property ZipCode to an Interested City, if available
+    if (propertyZip) {
+      try {
+        const zipRecord = await prisma.zipCode.findUnique({
+          where: { code: propertyZip },
+          include: { city: true }
+        });
+
+        if (zipRecord && zipRecord.cityId) {
+          // Add this city to the User's InterestCities if not already there
+          const existingInterest = await prisma.userInterestCity.findUnique({
+            where: {
+              userId_cityId: {
+                userId: user.id,
+                cityId: zipRecord.cityId
+              }
+            }
+          });
+
+          if (!existingInterest) {
+            await prisma.userInterestCity.create({
+              data: {
+                userId: user.id,
+                cityId: zipRecord.cityId
+              }
+            });
+            console.log(`Linked user ${user.id} to interested city ${zipRecord.city.name} (Zip: ${propertyZip})`);
+          }
+        }
+      } catch (zipError) {
+        console.error("Error mapping ZipCode to UserInterestCity:", zipError);
+        // We don't want to fail the entire submission if zip mapping fails
+      }
+    }
+
+    // 4. Notify all active administrators
     const admins = await prisma.user.findMany({
       where: {
         isAdmin: true,
@@ -93,11 +131,16 @@ export async function POST(request: Request) {
           from: `"NJ Eunice Real Estate" <${emailUser}>`,
           to: adminEmails,
           replyTo: normalizedEmail,
-          subject: `New Message from ${firstName} ${lastName}`,
-          text: `You have received a new message.\n\nName: ${firstName} ${lastName}\nEmail: ${normalizedEmail}\nPhone: ${phone || 'N/A'}\n\nMessage:\n${message}`,
+          subject: `New Property Inquiry from ${firstName} ${lastName}`,
+          text: `You have received a new property inquiry.\n\nProperty: ${propertyAddress} (MLS# ${propertyMlsId || 'Unknown'})\n\nName: ${firstName} ${lastName}\nEmail: ${normalizedEmail}\nPhone: ${phone || 'N/A'}\n\nMessage:\n${message}`,
           html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-              <h2 style="color: #000;">New Contact Message</h2>
+              <h2 style="color: #000;">New Property Inquiry</h2>
+              <div style="background-color: #f0f7ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <strong>Property details:</strong>
+                <p style="margin: 5px 0 0 0;">${propertyAddress}</p>
+                <p style="margin: 5px 0 0 0;">MLS# ${propertyMlsId || 'Unknown'}</p>
+              </div>
               <p><strong>Name:</strong> ${firstName} ${lastName}</p>
               <p><strong>Email:</strong> ${normalizedEmail}</p>
               <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
@@ -114,9 +157,9 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, message: 'Message sent successfully' });
+    return NextResponse.json({ success: true, message: 'Property inquiry sent successfully' });
   } catch (error) {
-    console.error('Error processing contact form submission:', error);
-    return NextResponse.json({ error: 'Failed to process submission' }, { status: 500 });
+    console.error('Error processing property inquiry submission:', error);
+    return NextResponse.json({ error: 'Failed to process inquiry' }, { status: 500 });
   }
 }

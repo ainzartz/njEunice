@@ -3,9 +3,10 @@ import Footer from '@/components/Footer';
 import PropertyDetailContent from '@/components/PropertyDetailContent';
 import { getCurrentUser } from '@/lib/auth-server';
 
-export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
+export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
-  const id = Number(params.id);
+  const resolvedParams = await params;
+  const id = Number(resolvedParams.id);
 
   return (
     <main className="min-h-screen font-sans bg-white flex flex-col">

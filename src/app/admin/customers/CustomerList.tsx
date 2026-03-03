@@ -12,10 +12,11 @@ interface User {
   phone: string;
   address: string;
   dob: string;
-  createdAt: string | Date;
   isLogin: boolean;
   isAdmin: boolean;
   isDeleted: boolean;
+  autoEmail: boolean;
+  autoSms: boolean;
 }
 
 interface CustomerListProps {

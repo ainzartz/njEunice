@@ -146,3 +146,27 @@ export const generateMarketInsight = async () => {
     throw error;
   }
 };
+
+export const translateToKorean = async (text: string): Promise<string> => {
+  if (!text) return "";
+  const model = getGeminiModel();
+
+  const prompt = `
+    You are an expert English-to-Korean translator specialized in US Real Estate terminology.
+    Translate the following property listing description into natural, professional Korean. 
+    Maintain a polite and persuasive tone suitable for a luxury real estate brokerage.
+    Do NOT include any markdown code blocks, metadata, or conversational filler in your response. Just output the translated text directly.
+    
+    Original Text:
+    "${text}"
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error) {
+    console.error("Error translating to Korean:", error);
+    return "번역 중 오류가 발생했습니다. 나중에 다시 시도해주세요.";
+  }
+};
