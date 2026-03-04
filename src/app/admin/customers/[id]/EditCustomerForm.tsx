@@ -191,6 +191,7 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
       }
 
       setSuccess('User updated successfully');
+      // Redirect to customer list after success
       router.push('/admin/customers');
       router.refresh();
     } catch (err: any) {
