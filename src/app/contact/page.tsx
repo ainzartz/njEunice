@@ -40,7 +40,7 @@ export default async function ContactPage() {
           {/* Contact Information */}
           <div className="space-y-12">
             <div>
-              <h2 className="text-2xl font-bold uppercase tracking-wider mb-6">Get In Touch</h2>
+              <h2 className="text-2xl font-bold uppercase tracking-wider mb-6 text-black">Get In Touch</h2>
               <p className="text-gray-600 leading-relaxed mb-8">
                 Whether you're looking to buy, sell, or simply have questions about the New Jersey market,
                 I'm here to help. Reach out directly or use the form to send a message.
@@ -55,7 +55,7 @@ export default async function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-1">Office Location</h3>
+                    <h3 className="font-bold text-lg mb-1 text-black">Office Location</h3>
                     <p className="text-gray-600">
                       460 Bergen Blvd. Suite 120<br />
                       Palisades Park, NJ 07650
@@ -70,7 +70,7 @@ export default async function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-1">Phone</h3>
+                    <h3 className="font-bold text-lg mb-1 text-black">Phone</h3>
                     <p className="text-gray-600">
                       <span className="font-medium text-black">Mobile:</span> 201.290.5256
                     </p>
@@ -87,7 +87,7 @@ export default async function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-1">Email</h3>
+                    <h3 className="font-bold text-lg mb-1 text-black">Email</h3>
                     <a href="mailto:realtoreunicehwang@gmail.com" className="text-gray-600 hover:text-black transition-colors underline">
                       realtoreunicehwang@gmail.com
                     </a>

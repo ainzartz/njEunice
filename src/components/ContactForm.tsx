@@ -148,11 +148,11 @@ export default function ContactForm() {
     <div className="bg-gray-50 p-8 md:p-12 rounded-lg border border-gray-100 shadow-sm">
       {!submitted ? (
         <form onSubmit={handleSubmit} className="space-y-6">
-          <h3 className="text-2xl font-bold uppercase tracking-wider mb-6">Send a Message</h3>
+          <h3 className="text-2xl font-bold uppercase tracking-wider mb-6 text-black">Send a Message</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wider text-gray-700">First Name</label>
+              <label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wider text-black">First Name</label>
               <input
                 type="text"
                 id="firstName"
@@ -165,7 +165,7 @@ export default function ContactForm() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="lastName" className="text-sm font-bold uppercase tracking-wider text-gray-700">Last Name</label>
+              <label htmlFor="lastName" className="text-sm font-bold uppercase tracking-wider text-black">Last Name</label>
               <input
                 type="text"
                 id="lastName"
@@ -180,7 +180,7 @@ export default function ContactForm() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-bold uppercase tracking-wider text-gray-700">Email Address</label>
+            <label htmlFor="email" className="text-sm font-bold uppercase tracking-wider text-black">Email Address</label>
             <div className="flex gap-2">
               <input
                 type="email"
@@ -242,7 +242,7 @@ export default function ContactForm() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="phone" className="text-sm font-bold uppercase tracking-wider text-gray-700">Phone (Optional)</label>
+            <label htmlFor="phone" className="text-sm font-bold uppercase tracking-wider text-black">Phone (Optional)</label>
             <input
               type="tel"
               id="phone"
@@ -256,7 +256,7 @@ export default function ContactForm() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="message" className="text-sm font-bold uppercase tracking-wider text-gray-700">Message</label>
+            <label htmlFor="message" className="text-sm font-bold uppercase tracking-wider text-black">Message</label>
             <textarea
               id="message"
               name="message"
