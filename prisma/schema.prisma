@@ -113,3 +113,8 @@ model PropertyImage {
 
   @@map("property_images")
 }
+
+model MlsMetadata {
+  id          String   @id @default("singleton")
+  lastUpdated DateTime @default(now())
+}

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { updateMlsMetadata } from '@/lib/mls-metadata';
 
 const username = '9500181';
 const password = 'Sun$3t!620w';
@@ -65,6 +66,9 @@ export async function GET(request: Request) {
     if (cookies) {
       authHeaders.set('Cookie', cookies.split(';')[0]);
     }
+
+    // Update metadata timestamp
+    await updateMlsMetadata();
 
     // 2. Determine classes to try
     // Using a list of common classes as a fallback

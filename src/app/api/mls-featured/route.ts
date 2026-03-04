@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { updateMlsMetadata } from '@/lib/mls-metadata';
 
 const username = '9500181';
 const password = 'Sun$3t!620w';
@@ -43,6 +44,9 @@ export async function GET(request: Request) {
 
     const authHeaders = new Headers(headers);
     if (cookies) authHeaders.set('Cookie', cookies.split(';')[0]);
+
+    // Update metadata timestamp
+    await updateMlsMetadata();
 
     // Query for targeted offices across multiple classes
     const officeQuery = TARGET_OFFICE_IDS.map(id => `(L_ListOffice1=${id})`).join('|');

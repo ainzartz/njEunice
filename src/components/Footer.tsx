@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import MlsTimestamp from './MlsTimestamp';
 
 const Footer = () => {
   return (
@@ -65,7 +66,7 @@ const Footer = () => {
 
               {/* Merged Text Block - Tight leading, justified */}
               <p className="text-[10px] text-gray-500 leading-tight text-justify">
-                The data relating to the real estate for sale on this web site comes in part from the Internet Data Exchange Program of the NJMLS. Real estate listings held by brokerage firms other than RE/MAX Now are marked with the Internet Data Exchange logo and information about them includes the name of the listing brokers. Some properties listed with the participating brokers do not appear on this website at the request of the seller. Listings of brokers that do not participate in Internet Data Exchange do not appear on this website. All information deemed reliable but not guaranteed. Last date updated: January 19, 2026 2:47 PM UTC Source: New Jersey Multiple Listing Service, Inc. © 2026 New Jersey Multiple Listing Service, Inc. All rights reserved.
+                The data relating to the real estate for sale on this web site comes in part from the Internet Data Exchange Program of the NJMLS. Real estate listings held by brokerage firms other than RE/MAX Now are marked with the Internet Data Exchange logo and information about them includes the name of the listing brokers. Some properties listed with the participating brokers do not appear on this website at the request of the seller. Listings of brokers that do not participate in Internet Data Exchange do not appear on this website. All information deemed reliable but not guaranteed. Last date updated: <MlsTimestamp /> Source: New Jersey Multiple Listing Service, Inc. © 2026 New Jersey Multiple Listing Service, Inc. All rights reserved.
               </p>
             </div>
           </div>

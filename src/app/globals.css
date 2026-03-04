@@ -21,6 +21,8 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-sans);
+  /* REVERT: Do not force scroll on body anymore */
+  overflow-y: auto;
 }
 
 html {
@@ -65,4 +67,38 @@ html {
 
 .animate-toast {
   animation: toastLifecycle 3s ease-in-out forwards;
+}
+
+/* Custom Scrollbar Styling - Applied to specific containers or globally with better scope */
+.custom-scrollbar {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable;
+  /* Prevent layout shift */
+}
+
+/* Global scrollbar styling for Chrome/Safari/Edge */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8f8f8;
+  border-left: 1px solid #eeeeee;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border-radius: 5px;
+  border: 2px solid #f8f8f8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #888888;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #bbbbbb #f8f8f8;
 }

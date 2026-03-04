@@ -465,10 +465,12 @@ export default function SearchContent() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-          {filteredListings.map((listing) => (
-            <PropertyCard key={listing.L_ListingID} property={listing} />
-          ))}
+        <div className="custom-scrollbar pr-4 -mr-4 max-h-[calc(100vh-450px)] overflow-y-auto overflow-x-hidden scroll-smooth min-h-[400px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 pb-12">
+            {filteredListings.map((listing) => (
+              <PropertyCard key={listing.L_ListingID} property={listing} />
+            ))}
+          </div>
         </div>
       )}
     </div>
