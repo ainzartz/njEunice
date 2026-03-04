@@ -211,7 +211,7 @@ export async function GET(request: Request) {
       searchUrl.searchParams.append('Query', query);
       searchUrl.searchParams.append('Format', 'COMPACT');
       searchUrl.searchParams.append('Limit', limit.toString());
-      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate');
+      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit');
       searchUrl.searchParams.append('StandardNames', '0');
 
       try {

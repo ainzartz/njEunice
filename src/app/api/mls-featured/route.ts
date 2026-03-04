@@ -28,7 +28,7 @@ function parseRETSCompact(xml: string) {
   return result;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const loginUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/login?rets-version=rets/1.8`;
 
   const headers = new Headers();
@@ -46,7 +46,7 @@ export async function GET() {
 
     // Query for targeted offices across multiple classes
     const officeQuery = TARGET_OFFICE_IDS.map(id => `(L_ListOffice1=${id})`).join('|');
-    const statusQuery = `(L_StatusCatID=1,2,3)`; // Active, Sold, Under Contract
+    const statusQuery = `(L_StatusCatID=1,3)`; // Active, Under Contract (Excluding Sold 2)
     const query = `${statusQuery},(${officeQuery})`;
 
     const fetchFromClass = async (cls: string, limit: number, type: 'sale' | 'rent') => {
@@ -57,12 +57,13 @@ export async function GET() {
       searchUrl.searchParams.append('Query', query);
       searchUrl.searchParams.append('Format', 'COMPACT');
       searchUrl.searchParams.append('Limit', limit.toString());
-      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate');
+      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit');
+      searchUrl.searchParams.append('StandardNames', '0');
 
       const res = await fetch(searchUrl.toString(), { method: 'GET', headers: authHeaders });
       const text = await res.text();
       const parsed = parseRETSCompact(text);
-      return parsed.map(item => ({ ...item, propertyType: type }));
+      return parsed.map(item => ({ ...item, propertyType: type, mlsClass: cls }));
     };
 
     // Try multiple classes for office listings
@@ -84,11 +85,12 @@ export async function GET() {
       fallbackUrl.searchParams.append('Query', fallbackQuery);
       fallbackUrl.searchParams.append('Format', 'COMPACT');
       fallbackUrl.searchParams.append('Limit', '6');
-      fallbackUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate');
+      fallbackUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit');
+      fallbackUrl.searchParams.append('StandardNames', '0');
 
       const fallbackRes = await fetch(fallbackUrl.toString(), { method: 'GET', headers: authHeaders });
       const fallbackText = await fallbackRes.text();
-      parsedData = parseRETSCompact(fallbackText);
+      parsedData = parseRETSCompact(fallbackText).map(item => ({ ...item, mlsClass: 'RE_1' }));
       isFallback = true;
     }
 
@@ -99,8 +101,11 @@ export async function GET() {
       return dateB.localeCompare(dateA);
     });
 
-    // Limit to 6 for the homepage if not fallback
-    if (!isFallback) {
+    const { searchParams } = new URL(request.url);
+    const all = searchParams.get('all') === 'true';
+
+    // Limit to 6 for the homepage if not fallback AND not requested all
+    if (!isFallback && !all) {
       parsedData = parsedData.slice(0, 6);
     }
 

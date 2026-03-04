@@ -9,6 +9,7 @@ export default function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const initialType = searchParams.get('type') || '';
+  const isFeatured = searchParams.get('featured') === 'true';
 
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,50 @@ export default function SearchContent() {
     rentals: true,
     commercial: true
   });
+
+  // Advanced Search States
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [advFilters, setAdvFilters] = useState({
+    minPrice: '',
+    maxPrice: '',
+    beds: 0,
+    baths: 0,
+    selectedStyles: [] as string[]
+  });
+  const [appliedAdvFilters, setAppliedAdvFilters] = useState(advFilters);
+
+  const getPropertyType = (type: string, mlsClass: string, style: string) => {
+    if (mlsClass === 'CM_5' || mlsClass === 'BU_7') return 'Commercial';
+    if (!type) return null;
+    const isSaleClass = ['RE_1', 'CT_3', 'MF_2'].includes(mlsClass || 'RE_1');
+    const s = (style || '').toLowerCase();
+
+    // Style-based overrides
+    if (s.includes('duplex')) return 'Multi-Floor';
+    if (s.includes('condo')) return 'Condo';
+    if (s.includes('co-op') || s.includes('coop')) return 'Co-op';
+    if (s.includes('townhouse')) return 'Townhouse';
+    if (s.includes('single family')) return 'Single Family';
+
+    switch (type) {
+      case '1': return 'Single Family';
+      case '7':
+      case '9':
+      case '18':
+      case '28':
+        return isSaleClass ? 'Single Family' : 'Apartment';
+      case '12': return 'Condo';
+      case '14': return 'Co-op';
+      case '16': return 'Multi-Floor';
+      case '17':
+        return s.includes('ranch') || s.includes('col') || s.includes('split') ? 'Single Family' : 'Multi-Floor';
+      case '19': return 'Condo';
+      case '20': return 'Condo';
+      case '21': return 'Condo';
+      case '26': return 'Townhouse';
+      default: return null;
+    }
+  };
 
   useEffect(() => {
     if (initialType === 'rent') {
@@ -38,11 +83,13 @@ export default function SearchContent() {
       setError('');
       setUnsupportedData(null);
       try {
-        const url = new URL('/api/mls-search', window.location.origin);
-        if (query) url.searchParams.append('q', query);
-        // We fetch everything to allow client-side filtering
+        const apiUrl = isFeatured ? '/api/mls-featured' : '/api/mls-search';
+        const params = new URLSearchParams();
+        if (query) params.append('q', query);
+        if (isFeatured) params.append('all', 'true');
 
-        const res = await fetch(url.toString());
+        const queryString = params.toString();
+        const res = await fetch(`${apiUrl}${queryString ? `?${queryString}` : ''}`);
         const data = await res.json();
 
         if (data.errorType === 'UNSUPPORTED_REGION') {
@@ -71,17 +118,112 @@ export default function SearchContent() {
     const isRent = cls === 'RN_4';
     const isComm = ['CM_5', 'BU_7'].includes(cls);
 
-    if (filters.residential && isRes) return true;
-    if (filters.rentals && isRent) return true;
-    if (filters.commercial && isComm) return true;
+    // Basic Categories
+    let match = false;
+    if (filters.residential && isRes) match = true;
+    if (filters.rentals && isRent) match = true;
+    if (filters.commercial && isComm) match = true;
 
-    return false;
+    if (!match) return false;
+
+    // Advanced Filters
+    const f = appliedAdvFilters;
+
+    // Price
+    const price = parseInt(item.L_AskingPrice || '0', 10);
+    if (f.minPrice && price < parseInt(f.minPrice, 10)) return false;
+    if (f.maxPrice && price > parseInt(f.maxPrice, 10)) return false;
+
+    // Beds / Baths
+    const itemBeds = parseInt(item.LM_Int1_1 || item.L_BedroomsTotal || '0', 10);
+    const itemBaths = parseInt(item.LM_Int1_19 || item.L_BathsFull || '0', 10);
+    if (f.beds > 0 && itemBeds < f.beds) return false;
+    if (f.baths > 0 && itemBaths < f.baths) return false;
+
+    // Style
+    if (f.selectedStyles.length > 0) {
+      const pType = getPropertyType(item.L_Type_, item.mlsClass, item.LM_Char10_7);
+      if (!pType || !f.selectedStyles.includes(pType)) return false;
+    }
+
+    return true;
   });
+
+  const handleApplyFilters = () => {
+    setAppliedAdvFilters({ ...advFilters });
+    setIsAdvancedOpen(false);
+  };
+
+  const handleResetAdvanced = () => {
+    const defaultFilters = {
+      minPrice: '',
+      maxPrice: '',
+      beds: 0,
+      baths: 0,
+      selectedStyles: []
+    };
+    setAdvFilters(defaultFilters);
+    setAppliedAdvFilters(defaultFilters);
+    // Also reset basic filters to default (all true) to ensure results show up
+    setFilters({ residential: true, rentals: true, commercial: true });
+  };
+
+  const formatWithCommas = (value: string) => {
+    const num = value.replace(/,/g, '');
+    if (!num || isNaN(Number(num))) return '';
+    return Number(num).toLocaleString('en-US');
+  };
+
+  const removeCommas = (value: string) => {
+    return value.replace(/,/g, '');
+  };
 
   const toggleFilter = (key: keyof typeof filters) => {
     setFilters(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const removeFilter = (type: string, value?: string) => {
+    const newFilters = { ...appliedAdvFilters };
+    if (type === 'price') {
+      newFilters.minPrice = '';
+      newFilters.maxPrice = '';
+    } else if (type === 'style' && value) {
+      newFilters.selectedStyles = newFilters.selectedStyles.filter(s => s !== value);
+    } else if (type === 'beds') {
+      newFilters.beds = 0;
+    } else if (type === 'baths') {
+      newFilters.baths = 0;
+    }
+    setAppliedAdvFilters(newFilters);
+    setAdvFilters(newFilters);
+  };
+
+  const getActiveFilterTags = () => {
+    const tags: { id: string; label: string; type: string; value?: string }[] = [];
+    const f = appliedAdvFilters;
+
+    if (f.minPrice || f.maxPrice) {
+      const min = f.minPrice ? `$${formatWithCommas(f.minPrice)}` : 'Min';
+      const max = f.maxPrice ? `$${formatWithCommas(f.maxPrice)}` : 'Max';
+      tags.push({ id: 'price', label: `${min} — ${max}`, type: 'price' });
+    }
+
+    f.selectedStyles.forEach(style => {
+      tags.push({ id: `style-${style}`, label: style, type: 'style', value: style });
+    });
+
+    if (f.beds > 0) {
+      tags.push({ id: 'beds', label: `${f.beds} Beds`, type: 'beds' });
+    }
+
+    if (f.baths > 0) {
+      tags.push({ id: 'baths', label: `${f.baths} Baths`, type: 'baths' });
+    }
+
+    return tags;
+  };
+
+  const activeFilterTags = getActiveFilterTags();
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -113,7 +255,9 @@ export default function SearchContent() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-gray-100 pb-8">
         <div>
           <h1 className="text-4xl font-light text-gray-900 mb-2">
-            Search Results {query && <span>for <span className="font-bold italic">"{query}"</span></span>}
+            {isFeatured ? 'Featured Properties' : (
+              <>Search Results {query && <span>for <span className="font-bold italic">"{query}"</span></span>}</>
+            )}
           </h1>
           <p className="text-gray-500 font-light">
             {filteredListings.length} {filteredListings.length === 1 ? 'property' : 'properties'} found
@@ -121,41 +265,182 @@ export default function SearchContent() {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-gray-400 mr-2">Filter by:</span>
+        <div className="flex flex-wrap lg:flex-nowrap items-center justify-end gap-10">
+          <div className="flex flex-wrap gap-4 items-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-2">Basic Filter:</span>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.residential}
+                onChange={() => toggleFilter('residential')}
+                className="w-4 h-4 accent-black rounded border-gray-300"
+              />
+              <span className={`text-sm tracking-tight transition-colors ${filters.residential ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Sale</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.rentals}
+                onChange={() => toggleFilter('rentals')}
+                className="w-4 h-4 accent-black rounded border-gray-300"
+              />
+              <span className={`text-sm tracking-tight transition-colors ${filters.rentals ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Lease</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.commercial}
+                onChange={() => toggleFilter('commercial')}
+                className="w-4 h-4 accent-black rounded border-gray-300"
+              />
+              <span className={`text-sm tracking-tight transition-colors ${filters.commercial ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Commercial</span>
+            </label>
+          </div>
 
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={filters.residential}
-              onChange={() => toggleFilter('residential')}
-              className="w-4 h-4 accent-black rounded border-gray-300"
-            />
-            <span className={`text-sm tracking-tight transition-colors ${filters.residential ? 'text-black font-bold' : 'text-gray-400 group-hover:text-gray-600'}`}>Residential</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={filters.rentals}
-              onChange={() => toggleFilter('rentals')}
-              className="w-4 h-4 accent-black rounded border-gray-300"
-            />
-            <span className={`text-sm tracking-tight transition-colors ${filters.rentals ? 'text-black font-bold' : 'text-gray-400 group-hover:text-gray-600'}`}>Rentals</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={filters.commercial}
-              onChange={() => toggleFilter('commercial')}
-              className="w-4 h-4 accent-black rounded border-gray-300"
-            />
-            <span className={`text-sm tracking-tight transition-colors ${filters.commercial ? 'text-black font-bold' : 'text-gray-400 group-hover:text-gray-600'}`}>Commercial</span>
-          </label>
+          <button
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600 hover:text-blue-800 transition-colors py-2 group whitespace-nowrap"
+          >
+            <span>Advance Filter</span>
+            <svg
+              className={`w-3 h-3 transition-transform duration-300 ${isAdvancedOpen ? 'rotate-180' : ''}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Advanced Search Accordion */}
+      <div className={`overflow-hidden transition-all duration-500 ease-in-out border-b border-gray-100 ${isAdvancedOpen ? 'max-h-[800px] mb-12 opacity-100 py-8' : 'max-h-0 opacity-0 py-0'}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Price Range */}
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Price Range ($)</h4>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                placeholder="Min"
+                value={formatWithCommas(advFilters.minPrice)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, ''); // Strictly only digits
+                  setAdvFilters(prev => ({ ...prev, minPrice: val }));
+                }}
+                className="w-full bg-gray-50 border border-gray-200 rounded-sm px-3 py-2 text-sm text-black focus:outline-none focus:border-black focus:ring-0 placeholder:text-gray-400 transition-colors"
+              />
+              <span className="text-gray-300">—</span>
+              <input
+                type="text"
+                placeholder="Max"
+                value={formatWithCommas(advFilters.maxPrice)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, ''); // Strictly only digits
+                  setAdvFilters(prev => ({ ...prev, maxPrice: val }));
+                }}
+                className="w-full bg-gray-50 border border-gray-200 rounded-sm px-3 py-2 text-sm text-black focus:outline-none focus:border-black focus:ring-0 placeholder:text-gray-400 transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Property Style */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Property Style</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-6">
+              {['Single Family', 'Condo', 'Co-op', 'Townhouse', 'Multi-Floor', 'Apartment'].map(style => (
+                <label key={style} className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={advFilters.selectedStyles.includes(style)}
+                    onChange={() => {
+                      const newStyles = advFilters.selectedStyles.includes(style)
+                        ? advFilters.selectedStyles.filter(s => s !== style)
+                        : [...advFilters.selectedStyles, style];
+                      setAdvFilters(prev => ({ ...prev, selectedStyles: newStyles }));
+                    }}
+                    className="w-4 h-4 accent-black rounded border-gray-300"
+                  />
+                  <span className={`text-sm transition-colors ${advFilters.selectedStyles.includes(style) ? 'text-black font-semibold' : 'text-gray-500 group-hover:text-gray-800'}`}>{style}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Beds / Baths */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between gap-8">
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Minimum Beds</h4>
+                <div className="flex items-center border border-gray-200 rounded-sm bg-white overflow-hidden w-28">
+                  <button
+                    onClick={() => setAdvFilters(prev => ({ ...prev, beds: Math.max(0, prev.beds - 1) }))}
+                    className="flex-1 px-3 py-2 hover:bg-gray-50 text-gray-600 transition-colors"
+                  >–</button>
+                  <span className="flex-1 text-center text-sm font-bold border-x border-gray-100 text-black">{advFilters.beds}</span>
+                  <button
+                    onClick={() => setAdvFilters(prev => ({ ...prev, beds: prev.beds + 1 }))}
+                    className="flex-1 px-3 py-2 hover:bg-gray-50 text-gray-600 transition-colors"
+                  >+</button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Minimum Baths</h4>
+                <div className="flex items-center border border-gray-200 rounded-sm bg-white overflow-hidden w-28">
+                  <button
+                    onClick={() => setAdvFilters(prev => ({ ...prev, baths: Math.max(0, prev.baths - 1) }))}
+                    className="flex-1 px-3 py-2 hover:bg-gray-50 text-gray-600 transition-colors"
+                  >–</button>
+                  <span className="flex-1 text-center text-sm font-bold border-x border-gray-100 text-black">{advFilters.baths}</span>
+                  <button
+                    onClick={() => setAdvFilters(prev => ({ ...prev, baths: prev.baths + 1 }))}
+                    className="flex-1 px-3 py-2 hover:bg-gray-50 text-gray-600 transition-colors"
+                  >+</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button
+                onClick={handleApplyFilters}
+                className="flex-grow bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] py-3 rounded-sm hover:bg-gray-800 transition-colors shadow-lg shadow-black/5"
+              >
+                Apply Filters
+              </button>
+              <button
+                onClick={handleResetAdvanced}
+                className="px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Active Filter Tags */}
+      {activeFilterTags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-1">Active Filters:</span>
+          {activeFilterTags.map(tag => (
+            <button
+              key={tag.id}
+              onClick={() => removeFilter(tag.type, tag.value)}
+              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-medium transition-colors group"
+            >
+              <span>{tag.label}</span>
+              <svg className="w-3 h-3 text-gray-400 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          ))}
+          <button
+            onClick={handleResetAdvanced}
+            className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors ml-2"
+          >
+            Clear All
+          </button>
+        </div>
+      )}
 
       {error ? (
         <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
@@ -173,13 +458,10 @@ export default function SearchContent() {
             {listings.length === 0 ? 'No listings found matching your search.' : 'No listings match the selected filters.'}
           </p>
           <button
-            onClick={() => {
-              if (listings.length === 0) window.history.back();
-              else setFilters({ residential: true, rentals: true, commercial: true });
-            }}
+            onClick={handleResetAdvanced}
             className="text-black font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-600 transition-colors"
           >
-            {listings.length === 0 ? 'Go Back' : 'Clear Filters'}
+            {listings.length === 0 ? 'Go Back' : 'Clear All Filters'}
           </button>
         </div>
       ) : (

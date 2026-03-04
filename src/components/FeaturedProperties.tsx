@@ -31,8 +31,8 @@ export default function FeaturedProperties() {
     return (
       <section className="py-20 bg-gray-50 px-6">
         <div className="max-w-7xl mx-auto text-center mb-16">
-          <h3 className="text-2xl font-bold uppercase tracking-widest mb-4">Featured Properties</h3>
-          <div className="h-0.5 w-16 bg-black mx-auto"></div>
+          <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-gray-500 mb-3">Latest to hit the market</h3>
+          <h2 className="text-3xl md:text-5xl font-serif text-black">Featured Properties</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {[1, 2, 3].map((i) => (
@@ -50,13 +50,12 @@ export default function FeaturedProperties() {
   return (
     <section className="py-20 bg-gray-50 px-6">
       <div className="max-w-7xl mx-auto text-center mb-16">
-        <h3 className="text-2xl font-bold uppercase tracking-widest mb-4">
-          {isFallback ? 'New Listings' : 'Featured Properties'}
-        </h3>
-        <p className="text-gray-400 text-sm tracking-[0.2em] mb-6 uppercase">
+        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-gray-500 mb-3">
           {isFallback ? 'Latest to hit the market' : 'Exclusive Office Listings'}
-        </p>
-        <div className="h-0.5 w-16 bg-black mx-auto"></div>
+        </h3>
+        <h2 className="text-3xl md:text-5xl font-serif text-black">
+          {isFallback ? 'New Listings' : 'Featured Properties'}
+        </h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
@@ -66,7 +65,7 @@ export default function FeaturedProperties() {
       </div>
 
       <div className="text-center mt-16">
-        <Link href="/buy" className="inline-flex items-center space-x-4 text-black font-bold uppercase tracking-[0.3em] group">
+        <Link href="/search?featured=true" className="inline-flex items-center space-x-4 text-black font-bold uppercase tracking-[0.3em] group">
           <span className="border-b-2 border-black pb-2 group-hover:text-gray-500 group-hover:border-gray-500 transition-colors">
             View All Properties
           </span>

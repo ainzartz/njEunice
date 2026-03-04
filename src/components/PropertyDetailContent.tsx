@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-export default function PropertyDetailContent({ id }: { id: number | string }) {
+export default function PropertyDetailContent({ id, mlsClass }: { id: number | string, mlsClass?: string }) {
   const [listing, setListing] = useState<any>(null);
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,7 +122,7 @@ export default function PropertyDetailContent({ id }: { id: number | string }) {
       try {
         setIsLoading(true);
         // Fetch Details
-        const detailsRes = await fetch(`/api/mls-details?id=${id}`);
+        const detailsRes = await fetch(`/api/mls-details?id=${id}${mlsClass ? `&class=${mlsClass}` : ''}`);
         const detailsData = await detailsRes.json();
 
         if (detailsData.success && detailsData.data) {
@@ -183,9 +183,12 @@ export default function PropertyDetailContent({ id }: { id: number | string }) {
   const city = listing.L_City || '';
   const state = listing.L_State || 'NJ';
   const zip = listing.L_Zip || '';
-  const isRent = listing.L_SaleRent === 'R' || listing.L_SaleRent === 'Rent';
+  const isRent = listing.L_SaleRent === 'R' || listing.L_SaleRent === 'Rent' || listing.mlsClass === 'RN_4';
 
-  const beds = listing.L_BedroomsTotal || listing.LM_Int1_1 || '-';
+  const isResidential = ['RE_1', 'CT_3', 'RN_4', 'MF_2'].includes(listing.mlsClass || 'RE_1');
+  const beds = isResidential && (!listing.L_BedroomsTotal || listing.L_BedroomsTotal === '0') && (!listing.LM_Int1_1 || listing.LM_Int1_1 === '0')
+    ? 'Studio'
+    : (listing.L_BedroomsTotal || listing.LM_Int1_1 || '-');
   const bathsFull = listing.L_BathsFull || listing.LM_Int1_19 || '-';
   const bathsHalf = listing.L_BathsHalf || listing.LM_Int1_20 || '0';
   const sqft = listing.L_SquareFeet || listing.LM_Int4_4 || 'N/A'; // NJMLS SandBox often omits SqFt, so 'N/A' is expected
@@ -254,6 +257,57 @@ export default function PropertyDetailContent({ id }: { id: number | string }) {
     }
   };
 
+  const getPropertyType = (type: string, mlsClass?: string, style?: string) => {
+    if (mlsClass === 'CM_5' || mlsClass === 'BU_7') return 'Commercial';
+
+    // Normalize style for checking
+    const s = (style || '').toLowerCase();
+
+    // Direct style overrides
+    if (s.includes('duplex')) return 'Multi-Floor';
+    if (s.includes('condo')) return 'Condo';
+    if (s.includes('co-op') || s.includes('coop')) return 'Co-op';
+    if (s.includes('townhouse')) return 'Townhouse';
+    if (s.includes('single family')) return 'Single Family';
+
+    const isSaleClass = ['RE_1', 'CT_3', 'MF_2'].includes(mlsClass || '');
+
+    switch (type) {
+      case '1': return 'Single Family';
+      case '7':
+      case '9':
+      case '18':
+      case '28':
+        return isSaleClass ? 'Single Family' : 'Apartment';
+      case '12': return 'Condo';
+      case '14': return 'Co-op';
+      case '16': return 'Multi-Floor';
+      case '17':
+        // For Type 17, if it's not explicitly a duplex in style, it's often a single family in rental class
+        return s.includes('ranch') || s.includes('col') || s.includes('split') ? 'Single Family' : 'Multi-Floor';
+      case '19': return 'Condo';
+      case '20': return 'Condo';
+      case '21': return 'Condo';
+      case '26': return 'Townhouse';
+      default: return null;
+    }
+  };
+
+  const propertyTypeName = getPropertyType(listing.L_Type_, listing.mlsClass, listing.LM_Char10_7);
+  const unit = listing.L_AddressUnit ? `, Unit ${listing.L_AddressUnit}` : '';
+
+  // Status Labels
+  const statusMap: Record<string, string> = {
+    '1': 'Active',
+    '2': 'Sold',
+    '3': 'Under Contract',
+    '4': 'Expired',
+    '5': 'Withdrawn',
+    '6': 'Leased'
+  };
+  const statusLabel = statusMap[listing.L_StatusCatID] || 'Active';
+  const isSold = listing.L_StatusCatID === '2' || listing.L_StatusCatID === '6';
+
   return (
     <div className="pb-20 flex-grow">
       {/* Basic Header (Dark Background for Transparent Navbar) */}
@@ -265,10 +319,17 @@ export default function PropertyDetailContent({ id }: { id: number | string }) {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="bg-white text-black text-xs font-bold px-3 py-1 uppercase tracking-widest">Active</span>
-                <span className="bg-transparent border border-gray-500 text-white text-xs font-bold px-3 py-1 uppercase tracking-widest">{isRent ? 'For Rent' : 'For Sale'}</span>
+                {statusLabel !== 'Active' && (
+                  <span className={`text-white text-xs font-bold px-3 py-1 uppercase tracking-widest ${isSold ? 'bg-red-600' : 'bg-orange-500'}`}>
+                    {statusLabel}
+                  </span>
+                )}
+                <span className="bg-transparent border border-gray-500 text-white text-xs font-bold px-3 py-1 uppercase tracking-widest">{isRent ? 'For Lease' : 'For Sale'}</span>
+                {propertyTypeName && (
+                  <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 uppercase tracking-widest">{propertyTypeName}</span>
+                )}
               </div>
-              <h1 className="text-3xl md:text-5xl font-light text-white mb-2">{address}</h1>
+              <h1 className="text-3xl md:text-5xl font-light text-white mb-2">{address}{unit}</h1>
               <p className="text-xl text-gray-400 mb-6">{city}, {state} {zip}</p>
 
               <div className="flex flex-col gap-1 border-l-2 border-gray-600 pl-4 py-1">
@@ -314,13 +375,18 @@ export default function PropertyDetailContent({ id }: { id: number | string }) {
                 </div>
               </div>
             ) : (
-              <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-indigo-50 to-gray-100 flex flex-col items-center justify-center">
-                <div className="bg-white/50 backdrop-blur-sm p-4 rounded-full mb-3 shadow-sm border border-gray-100">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-indigo-50 to-gray-100 flex flex-col items-center justify-center space-y-4 p-8 text-center">
+                <div className="bg-white/50 backdrop-blur-sm p-5 rounded-full shadow-sm border border-gray-100">
+                  <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
                 </div>
-                <span className="text-sm font-medium text-gray-500 tracking-wider uppercase">Photo Unavailable</span>
+                <div className="flex flex-col gap-2">
+                  {listing.L_ListingDate === '2026-03-04' && (
+                    <span className="text-xs font-bold text-blue-600 uppercase tracking-[0.2em]">New Listing</span>
+                  )}
+                  <span className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Photo Coming Soon</span>
+                </div>
               </div>
             )}
 
@@ -356,20 +422,31 @@ export default function PropertyDetailContent({ id }: { id: number | string }) {
           </div>
 
           {/* Specs */}
-          <div className="grid grid-cols-3 gap-4 border-y border-gray-200 py-8 text-center">
-            <div>
-              <span className="block text-2xl font-bold text-black">{beds}</span>
-              <span className="text-xs uppercase tracking-widest text-gray-500">Bedrooms</span>
+          {isResidential && (
+            <div className="grid grid-cols-3 gap-4 border-y border-gray-200 py-8 text-center">
+              <div>
+                <span className="block text-2xl font-bold text-black">{beds}</span>
+                <span className="text-xs uppercase tracking-widest text-gray-500">Bedrooms</span>
+              </div>
+              <div className="border-x border-gray-200">
+                <span className="block text-2xl font-bold text-black">{bathsFull}{bathsHalf !== '0' ? '.5' : ''}</span>
+                <span className="text-xs uppercase tracking-widest text-gray-500">Bathrooms</span>
+              </div>
+              <div>
+                <span className="block text-2xl font-bold text-black">{sqft}</span>
+                <span className="text-xs uppercase tracking-widest text-gray-500">Sq Ft</span>
+              </div>
             </div>
-            <div className="border-x border-gray-200">
-              <span className="block text-2xl font-bold text-black">{bathsFull}{bathsHalf !== '0' ? `.${bathsHalf}` : ''}</span>
-              <span className="text-xs uppercase tracking-widest text-gray-500">Bathrooms</span>
+          )}
+
+          {!isResidential && sqft !== 'N/A' && (
+            <div className="border-y border-gray-200 py-8 text-center">
+              <div>
+                <span className="block text-2xl font-bold text-black">{sqft}</span>
+                <span className="text-xs uppercase tracking-widest text-gray-500">Sq Ft</span>
+              </div>
             </div>
-            <div>
-              <span className="block text-2xl font-bold text-black">{sqft}</span>
-              <span className="text-xs uppercase tracking-widest text-gray-500">Sq Ft</span>
-            </div>
-          </div>
+          )}
 
           {/* Description */}
           <div>

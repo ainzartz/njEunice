@@ -104,3 +104,12 @@ model Message {
   @@index([userId])
   @@map("messages")
 }
+
+model PropertyImage {
+  listingId String   @id
+  urls      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("property_images")
+}

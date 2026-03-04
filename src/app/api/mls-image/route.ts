@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 const username = '9500181';
 const password = 'Sun$3t!620w';
@@ -36,6 +37,25 @@ export async function GET(request: Request) {
   headers.set('User-Agent', 'NJEunice/1.0');
 
   try {
+    // 0. Check Database Cache
+    const cached = await prisma.propertyImage.findUnique({
+      where: { listingId: id }
+    });
+
+    const isExpired = cached ? (Date.now() - new Date(cached.updatedAt).getTime() > 24 * 60 * 60 * 1000) : true;
+
+    if (cached && !isExpired && cached.urls.length > 0) {
+      return NextResponse.json({
+        success: true,
+        images: cached.urls,
+        cached: true
+      }, {
+        headers: {
+          'Cache-Control': 's-maxage=86400, stale-while-revalidate=3600',
+        }
+      });
+    }
+
     // 1. Login
     const loginRes = await fetch(loginUrl, { method: 'GET', headers });
     const cookies = loginRes.headers.get('set-cookie');
@@ -69,12 +89,27 @@ export async function GET(request: Request) {
     const logoutUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/logout`;
     await fetch(logoutUrl, { method: 'GET', headers: authHeaders });
 
+    // 5. Store in Database Cache
+    if (images.length > 0) {
+      await prisma.propertyImage.upsert({
+        where: { listingId: id },
+        update: { urls: images },
+        create: { listingId: id, urls: images }
+      });
+    }
+
     return NextResponse.json({
       success: true,
-      images: images
+      images: images,
+      cached: false
+    }, {
+      headers: {
+        'Cache-Control': 's-maxage=86400, stale-while-revalidate=3600',
+      }
     });
 
   } catch (error: any) {
+    console.error('mls-image error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

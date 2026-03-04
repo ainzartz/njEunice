@@ -39,6 +39,7 @@ function parseRETSCompact(xmlText: string) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
+  const providedClass = searchParams.get('class');
 
   if (!id) {
     return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
@@ -65,38 +66,43 @@ export async function GET(request: Request) {
       authHeaders.set('Cookie', cookies.split(';')[0]);
     }
 
-    // 2. Build the DMQL2 Query for specific listing
-    const query = `(L_ListingID=${id})`;
+    // 2. Determine classes to try
+    // Using a list of common classes as a fallback
+    const classesToTry = providedClass ? [providedClass] : ['RE_1', 'CT_3', 'RN_4', 'CM_5', 'BU_7', 'MF_2'];
+    let finalData = null;
 
-    // 3. Search Transaction
-    const searchUrl = new URL(`https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/search`);
-    searchUrl.searchParams.append('SearchType', 'Property');
-    searchUrl.searchParams.append('Class', 'RE_1');
-    searchUrl.searchParams.append('QueryType', 'DMQL2');
-    searchUrl.searchParams.append('Query', query);
-    searchUrl.searchParams.append('Format', 'COMPACT');
-    searchUrl.searchParams.append('Limit', '1');
-    // searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,L_Area,L_Type_,L_PropertyType,L_Status,L_BedroomsTotal,L_BathsFull,L_BathsHalf,L_SquareFeet,L_LotSizeDimensions,L_Taxes,LM_Dec_1,LM_Dec_2,LM_Dec_3,L_UpdateDate,L_Remarks');
-    searchUrl.searchParams.append('StandardNames', '0');
-    searchUrl.searchParams.append('Count', '1');
+    for (const cls of classesToTry) {
+      const query = `(L_ListingID=${id})`;
+      const searchUrl = new URL(`https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/search`);
+      searchUrl.searchParams.append('SearchType', 'Property');
+      searchUrl.searchParams.append('Class', cls);
+      searchUrl.searchParams.append('QueryType', 'DMQL2');
+      searchUrl.searchParams.append('Query', query);
+      searchUrl.searchParams.append('Format', 'COMPACT');
+      searchUrl.searchParams.append('Limit', '1');
+      searchUrl.searchParams.append('StandardNames', '0');
 
-    // Fetch search results
-    const searchRes = await fetch(searchUrl.toString(), { method: 'GET', headers: authHeaders });
-    const searchText = await searchRes.text();
+      const searchRes = await fetch(searchUrl.toString(), { method: 'GET', headers: authHeaders });
+      const searchText = await searchRes.text();
+      const parsedData = parseRETSCompact(searchText);
 
-    const parsedData = parseRETSCompact(searchText);
+      if (parsedData.length > 0) {
+        finalData = { ...parsedData[0], mlsClass: cls };
+        break;
+      }
+    }
 
-    // 4. Logout (ALWAYS)
+    // 3. Logout (ALWAYS)
     const logoutUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/logout`;
     await fetch(logoutUrl, { method: 'GET', headers: authHeaders });
 
-    if (parsedData.length === 0) {
+    if (!finalData) {
       return NextResponse.json({ success: false, error: 'Listing not found' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      data: parsedData[0]
+      data: finalData
     });
 
   } catch (error: any) {

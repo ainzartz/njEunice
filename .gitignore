@@ -30,3 +30,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temp/personal
+.venv/
+check_db.js
+pdf_content.txt
+check-njmls-login.js
+check-njmls-search.ts
+test-gemini.js
+rates.html
+pdf_content.txt
+*.js
+!next.config.js
+!postcss.config.js
+!tailwind.config.ts
+!scripts/**/*.js
