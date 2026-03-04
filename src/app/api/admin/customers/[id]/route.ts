@@ -41,7 +41,12 @@ export async function GET(
       dob: user.dobEncrypted ? decrypt(user.dobEncrypted) : '',
       passwordHash: undefined, // Hide password hash
       hasPassword: !!user.passwordHash,
-      interestedCityIds: user.interestCities.map(ic => ic.cityId)
+      interestedCityIds: user.interestCities.map(ic => ic.cityId),
+      interestType: user.interestType,
+      minPrice: user.minPrice,
+      maxPrice: user.maxPrice,
+      minBeds: user.minBeds,
+      minBaths: user.minBaths
     };
 
     return NextResponse.json(decryptedUser);
@@ -76,7 +81,12 @@ export async function PATCH(
       autoSms,
       isAdmin,
       isLogin,
-      interestedCityIds
+      interestedCityIds,
+      interestType,
+      minPrice,
+      maxPrice,
+      minBeds,
+      minBaths
     } = data;
 
     // Check if user exists
@@ -108,6 +118,12 @@ export async function PATCH(
     updateData.autoSms = !!autoSms;
     updateData.isAdmin = !!isAdmin;
     updateData.isLogin = !!isLogin;
+
+    updateData.interestType = interestType || null;
+    updateData.minPrice = minPrice ? parseInt(minPrice) : null;
+    updateData.maxPrice = maxPrice ? parseInt(maxPrice) : null;
+    updateData.minBeds = minBeds ? parseInt(minBeds) : null;
+    updateData.minBaths = minBaths ? parseFloat(minBaths) : null;
 
     let newPasswordHash: string | undefined = undefined;
     if (password) {

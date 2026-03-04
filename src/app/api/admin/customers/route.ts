@@ -25,7 +25,12 @@ export async function POST(req: NextRequest) {
       autoSms,
       isAdmin,
       isLogin,
-      interestedCityIds
+      interestedCityIds,
+      interestType,
+      minPrice,
+      maxPrice,
+      minBeds,
+      minBaths
     } = data;
 
     if (!email || !firstName || !lastName) {
@@ -69,6 +74,11 @@ export async function POST(req: NextRequest) {
           autoSms: !!autoSms,
           isAdmin: !!isAdmin,
           isLogin: !!isLogin,
+          interestType: interestType || null,
+          minPrice: minPrice ? parseInt(minPrice) : null,
+          maxPrice: maxPrice ? parseInt(maxPrice) : null,
+          minBeds: minBeds ? parseInt(minBeds) : null,
+          minBaths: minBaths ? parseFloat(minBaths) : null,
         },
       });
 

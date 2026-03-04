@@ -38,7 +38,12 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
     isAdmin: false,
     isLogin: false,
     isDeleted: false,
-    interestedCityIds: [] as string[]
+    interestedCityIds: [] as string[],
+    interestType: '',
+    minPrice: '',
+    maxPrice: '',
+    minBeds: '',
+    minBaths: ''
   });
   const [hasPassword, setHasPassword] = useState(false);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -89,7 +94,12 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
           isAdmin: userData.isAdmin || false,
           isLogin: userData.isLogin || false,
           isDeleted: userData.isDeleted || false,
-          interestedCityIds: userData.interestedCityIds || []
+          interestedCityIds: userData.interestedCityIds || [],
+          interestType: userData.interestType || '',
+          minPrice: userData.minPrice?.toString() || '',
+          maxPrice: userData.maxPrice?.toString() || '',
+          minBeds: userData.minBeds?.toString() || '',
+          minBaths: userData.minBaths?.toString() || ''
         });
         setHasPassword(userData.hasPassword || false);
       } catch (err: any) {
@@ -354,6 +364,80 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
                       </div>
                     )}
                   </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-medium mb-4 uppercase tracking-wider text-gray-800 border-b border-gray-100 pb-2">Real Estate Preferences</h3>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Interest Type</label>
+                <select
+                  name="interestType"
+                  value={formData.interestType}
+                  onChange={handleChange}
+                  className="w-full md:w-1/2 p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none bg-white"
+                >
+                  <option value="">Select Interest...</option>
+                  <option value="BUY">Buy</option>
+                  <option value="SELL">Sell</option>
+                  <option value="LEASE">Lease</option>
+                  <option value="COMMERCIAL">Commercial</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Price ($)</label>
+                  <input
+                    type="number"
+                    name="minPrice"
+                    value={formData.minPrice}
+                    onChange={handleChange}
+                    placeholder="e.g., 500000"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Max Price ($)</label>
+                  <input
+                    type="number"
+                    name="maxPrice"
+                    value={formData.maxPrice}
+                    onChange={handleChange}
+                    placeholder="e.g., 1000000"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none"
+                  />
+                </div>
+
+                {(formData.interestType === 'BUY' || formData.interestType === 'LEASE') && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Min Bedrooms</label>
+                      <input
+                        type="number"
+                        name="minBeds"
+                        value={formData.minBeds}
+                        onChange={handleChange}
+                        placeholder="e.g., 3"
+                        className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Min Bathrooms</label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        name="minBaths"
+                        value={formData.minBaths}
+                        onChange={handleChange}
+                        placeholder="e.g., 2.5"
+                        className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none"
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
