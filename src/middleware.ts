@@ -32,7 +32,9 @@ export function middleware(request: NextRequest) {
     const origin = request.headers.get('origin');
     const referer = request.headers.get('referer');
     const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
-    const ip = request.ip || 'anonymous';
+    // Get IP safely (Next.js 16/Vercel)
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : (request.headers.get('x-real-ip') || 'anonymous');
 
     // 1. Basic Rate Limiting
     if (isRateLimited(ip, pathname)) {
