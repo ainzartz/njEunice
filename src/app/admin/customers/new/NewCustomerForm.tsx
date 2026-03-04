@@ -93,6 +93,9 @@ export default function NewCustomerForm() {
         if (!isNaN(num)) {
           finalValue = (Math.floor(num) + 0.5).toString();
         }
+      } else if (name === 'minPrice' || name === 'maxPrice') {
+        const numericValue = value.replace(/[^0-9]/g, '');
+        finalValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       }
       setFormData(prev => ({ ...prev, [name]: finalValue }));
     }
@@ -122,7 +125,11 @@ export default function NewCustomerForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          minPrice: formData.minPrice.replace(/,/g, ''),
+          maxPrice: formData.maxPrice.replace(/,/g, '')
+        }),
       });
 
       if (!res.ok) {
@@ -284,22 +291,22 @@ export default function NewCustomerForm() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Min Price ($)</label>
                   <input
-                    type="number"
+                    type="text"
                     name="minPrice"
                     value={formData.minPrice}
                     onChange={handleChange}
-                    placeholder="e.g., 500000"
+                    placeholder="e.g., 500,000"
                     className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Max Price ($)</label>
                   <input
-                    type="number"
+                    type="text"
                     name="maxPrice"
                     value={formData.maxPrice}
                     onChange={handleChange}
-                    placeholder="e.g., 1000000"
+                    placeholder="e.g., 1,000,000"
                     className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none"
                   />
                 </div>
