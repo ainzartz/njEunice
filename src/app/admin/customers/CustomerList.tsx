@@ -17,6 +17,7 @@ interface User {
   isDeleted: boolean;
   autoEmail: boolean;
   autoSms: boolean;
+  createdAt: string | Date;
 }
 
 interface CustomerListProps {

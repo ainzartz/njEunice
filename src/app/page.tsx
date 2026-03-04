@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
 import Link from 'next/link';
 import ScrollRevealImage from '@/components/ScrollRevealImage';
+import FeaturedProperties from '@/components/FeaturedProperties';
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -54,28 +55,7 @@ export default async function Home() {
       </section>
 
       <Testimonials />
-
-      {/* Featured Listings Placeholder */}
-      <section className="py-20 bg-gray-50 px-6">
-        <div className="max-w-7xl mx-auto text-center mb-16">
-          <h3 className="text-2xl font-bold uppercase tracking-widest mb-4">Featured Properties</h3>
-          <div className="h-0.5 w-16 bg-black mx-auto"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-[4/5] bg-white border border-gray-200 flex items-center justify-center relative group overflow-hidden cursor-pointer">
-              <p className="text-gray-400 text-sm tracking-widest uppercase z-10">Listing {i}</p>
-              <div className="absolute inset-0 bg-gray-100 group-hover:bg-gray-200 transition-colors"></div>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-12">
-          <Link href="/buy" className="text-sm font-bold border-b border-black pb-1 hover:text-gray-600 transition-colors uppercase tracking-widest">
-            View All Listings
-          </Link>
-        </div>
-      </section>
-
+      <FeaturedProperties />
       <Footer />
 
 

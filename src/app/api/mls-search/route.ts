@@ -142,26 +142,20 @@ export async function GET(request: Request) {
     if (q) {
       const safeQ = q.replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
       if (safeQ) {
-        // Step A: City name normalization pre-check
-        // Use alpha-only for city matching to handle "2 Euclid Fort Lee" correctly
         const joinedInput = safeQ.replace(/[^a-zA-Z]/g, '').toLowerCase();
 
-        // Use the already fetched supported cities for normalization
         const matchedCity = supportedCities.find(c => {
           const cName = c.name.replace(/[^a-zA-Z]/g, '').toLowerCase();
           return joinedInput === cName || joinedInput.includes(cName);
         });
 
-        // Step B: Word-based "AND of ORs" logic
         let words = safeQ.split(/\s+/).filter(w => {
           const val = w.trim().toLowerCase();
-          return val.length > 0 && val !== 'nj'; // Skip 'NJ' and empty
+          return val.length > 0 && val !== 'nj';
         });
 
         let queryClauses = [query];
 
-        // If it's a single word search (like "fortlee") and we matched a city,
-        // use the city's parts instead of the original word to ensure matching.
         if (matchedCity && words.length === 1 && !/^\d+$/.test(words[0])) {
           const cityParts = matchedCity.name.split(/\s+/).filter(w => w.length > 0);
           for (const part of cityParts) {
@@ -187,7 +181,7 @@ export async function GET(request: Request) {
 
             if (wordOrs.length > 1) {
               queryClauses.push(`(${wordOrs.join('|')})`);
-            } else {
+            } else if (wordOrs.length === 1) {
               queryClauses.push(wordOrs[0]);
             }
           }
@@ -197,28 +191,54 @@ export async function GET(request: Request) {
       }
     }
 
-    // 3. Search Transaction
-    const searchUrl = new URL(`https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/search`);
-    searchUrl.searchParams.append('SearchType', 'Property');
-    searchUrl.searchParams.append('Class', 'RE_1');
-    searchUrl.searchParams.append('QueryType', 'DMQL2');
-    searchUrl.searchParams.append('Query', query);
-    searchUrl.searchParams.append('Format', 'COMPACT');
-    searchUrl.searchParams.append('Limit', '600');
-    searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate'); // Removed L_Remarks
-    searchUrl.searchParams.append('StandardNames', '0'); // using System Names as found in metadata
-    searchUrl.searchParams.append('Count', '1');
-    const searchRes = await fetch(searchUrl.toString(), { method: 'GET', headers: authHeaders });
-    const searchText = await searchRes.text();
+    const type = (searchParams.get('type') || '').toLowerCase(); // sale, rent, commercial
 
-    // Check if RETS returned an error (usually ReplyCode != 0)
-    const replyCodeMatch = searchText.match(/ReplyCode="([^"]*)"/);
-    const replyTextMatch = searchText.match(/ReplyText="([^"]*)"/);
-    // console.log(`API RETS Reply: Code=${replyCodeMatch?.[1]}, Text=${replyTextMatch?.[1]}`);
+    // 4. Search across multiple classes
+    let classes = [
+      { id: 'RE_1', limit: 300, type: 'sale' as const },
+      { id: 'CT_3', limit: 200, type: 'sale' as const },
+      { id: 'RN_4', limit: 200, type: 'rent' as const },
+      { id: 'CM_5', limit: 100, type: 'sale' as const },
+      { id: 'BU_7', limit: 50, type: 'sale' as const },
+      { id: 'MF_2', limit: 100, type: 'sale' as const }
+    ];
 
-    const parsedData = parseRETSCompact(searchText);
+    const fetchItems = async (cls: string, limit: number, type: 'sale' | 'rent') => {
+      const searchUrl = new URL(`https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/search`);
+      searchUrl.searchParams.append('SearchType', 'Property');
+      searchUrl.searchParams.append('Class', cls);
+      searchUrl.searchParams.append('QueryType', 'DMQL2');
+      searchUrl.searchParams.append('Query', query);
+      searchUrl.searchParams.append('Format', 'COMPACT');
+      searchUrl.searchParams.append('Limit', limit.toString());
+      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate');
+      searchUrl.searchParams.append('StandardNames', '0');
 
-    // 4. Logout (ALWAYS)
+      try {
+        const res = await fetch(searchUrl.toString(), { method: 'GET', headers: authHeaders });
+        const text = await res.text();
+        const parsed = parseRETSCompact(text);
+        return parsed.map(item => ({ ...item, propertyType: type, mlsClass: cls }));
+      } catch (err) {
+        console.error(`Error fetching class ${cls}:`, err);
+        return [];
+      }
+    };
+
+    const allResults = await Promise.all(
+      classes.map(c => fetchItems(c.id, c.limit, c.type))
+    );
+
+    const parsedData = allResults.flat();
+
+    // Sort by date newest first
+    parsedData.sort((a, b) => {
+      const dateA = a.L_ListingDate || '';
+      const dateB = b.L_ListingDate || '';
+      return dateB.localeCompare(dateA);
+    });
+
+    // 5. Logout (ALWAYS)
     const logoutUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/logout`;
     await fetch(logoutUrl, { method: 'GET', headers: authHeaders });
 

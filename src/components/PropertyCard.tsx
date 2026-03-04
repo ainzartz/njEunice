@@ -8,7 +8,7 @@ interface PropertyCardProps {
 
 import { useEffect, useState } from 'react';
 
-const PropertyCard = ({ listing }: PropertyCardProps) => {
+const PropertyCard = ({ property: listing }: any) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(true);
 
@@ -44,6 +44,7 @@ const PropertyCard = ({ listing }: PropertyCardProps) => {
 
   // Safely parse price
   const price = listing.L_AskingPrice ? parseInt(listing.L_AskingPrice, 10) : 0;
+  const formattedPrice = price > 0 ? formatter.format(price) : 'Price Upon Request';
 
   // Format Address
   const address = `${listing.L_AddressNumber || ''} ${listing.L_AddressStreet || ''}`.trim() || 'Address Unavailable';
@@ -52,8 +53,35 @@ const PropertyCard = ({ listing }: PropertyCardProps) => {
   const zip = listing.L_Zip || '';
 
   // Determine Sale/Rent
-  // L_SaleRent is usually 'S' for Sale or 'R' for Rent
-  const isRent = listing.L_SaleRent === 'R' || listing.L_SaleRent === 'Rent';
+  const isRent = listing.propertyType === 'rent' || listing.L_SaleRent === 'R' || listing.L_SaleRent === 'Rent';
+  const displayPrice = isRent ? `${formattedPrice}/mo` : formattedPrice;
+
+  // Status Labels
+  const statusMap: Record<string, string> = {
+    '1': 'Active',
+    '2': 'Sold',
+    '3': 'Under Contract',
+    '4': 'Expired',
+    '5': 'Withdrawn',
+    '6': 'Leased'
+  };
+  const statusLabel = statusMap[listing.L_StatusCatID] || 'Active';
+  const isSold = listing.L_StatusCatID === '2' || listing.L_StatusCatID === '6';
+
+  const dateStr = listing.L_ListingDate;
+  let formattedDate = '';
+  if (dateStr) {
+    try {
+      const date = new Date(dateStr);
+      formattedDate = date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (e) {
+      console.error("Error formatting date", dateStr, e);
+    }
+  }
 
   return (
     <Link href={`/property/${listing.L_ListingID}`} className="block group">
@@ -83,8 +111,8 @@ const PropertyCard = ({ listing }: PropertyCardProps) => {
               <span className="text-xs font-medium text-gray-500 tracking-wider uppercase">Photo Unavailable</span>
             </div>
           )}
-          <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1.5 rounded-sm uppercase tracking-widest shadow-lg">
-            ACTIVE
+          <div className={`absolute top-3 left-3 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1.5 rounded-sm uppercase tracking-widest shadow-lg ${isSold ? 'bg-red-600/90' : 'bg-black/80'}`}>
+            {statusLabel}
           </div>
           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-black text-[10px] font-bold px-3 py-1.5 rounded-sm uppercase tracking-widest shadow-lg">
             {isRent ? 'For Rent' : 'For Sale'}
@@ -92,17 +120,21 @@ const PropertyCard = ({ listing }: PropertyCardProps) => {
         </div>
 
         <div className="p-4">
-          <h3 className="text-xl font-bold text-gray-900 mb-1 flex justify-between items-center">
-            <span>
-              {formatter.format(price)}
-              {isRent && <span className="text-sm font-normal text-gray-500">/mo</span>}
-            </span>
-            <span className="text-sm font-normal text-gray-500">MLS: {listing.L_ListingID}</span>
-          </h3>
+          <div className="flex justify-between items-baseline mb-1">
+            <h4 className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-blue-700 transition-colors">
+              {displayPrice}
+            </h4>
+            <span className="text-xs font-normal text-gray-500">MLS: {listing.L_ListingID}</span>
+          </div>
 
-          <p className="text-gray-600 text-sm mb-4 line-clamp-1">
+          <p className="text-gray-600 text-sm line-clamp-1">
             {address}, {city} {state} {zip}
           </p>
+          {formattedDate && (
+            <p className="text-[10px] text-gray-400 mt-1 mb-3 uppercase tracking-wider font-medium">
+              Listed on {formattedDate}
+            </p>
+          )}
 
         </div>
       </div>

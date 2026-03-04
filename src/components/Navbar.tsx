@@ -84,6 +84,7 @@ const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
         <div className="hidden md:flex space-x-8 items-center">
           {['Buy', 'Sell', 'Lease', 'Commercial', 'About', 'Contact'].map((item) => {
             const href = item === 'About' ? '/#about' : `/${item.toLowerCase()}`;
+
             return (
               <Link
                 key={item}

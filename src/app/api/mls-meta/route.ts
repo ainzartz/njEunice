@@ -28,9 +28,8 @@ export async function GET() {
       authHeaders.set('Cookie', cookies.split(';')[0]);
     }
 
-    // 2. Fetch Metadata (System)
-    // This will tell us what resources (e.g., Property) and classes (e.g., Residential) are available
-    const metadataUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/getmetadata?Type=METADATA-RESOURCE&ID=0&Format=COMPACT`;
+    // 2. Fetch Metadata (Class) for Property resource
+    const metadataUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/getmetadata?Type=METADATA-CLASS&ID=Property&Format=COMPACT`;
 
     const metaRes = await fetch(metadataUrl, { method: 'GET', headers: authHeaders });
     const metaText = await metaRes.text();
