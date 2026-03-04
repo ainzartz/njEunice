@@ -7,20 +7,30 @@ export default async function CommercialPage() {
 
   return (
     <main className="min-h-screen bg-white font-sans flex flex-col">
-      <Navbar theme="light" user={user} />
+      <Navbar user={user} />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-light tracking-tight mb-8">
+      <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/commercial_hero.png"
+            alt="Modern Commercial Building"
+            className="w-full h-full object-cover scale-105 animate-subtle-zoom"
+          />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px]"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto text-center px-6 pt-20">
+          <h1 className="text-5xl md:text-7xl font-normal tracking-tight text-white mb-6 animate-fade-in-up [text-shadow:0_2px_10px_rgba(0,0,0,0.3)]">
             Commercial & <br />
-            <span className="font-bold whitespace-nowrap">Investment Real Estate</span>
+            <span className="font-bold">Investment Real Estate</span>
           </h1>
-          <p className="text-xl text-slate-400 max-w-3xl font-light leading-relaxed">
+          <p className="text-gray-300 max-w-3xl mx-auto text-xl font-light leading-relaxed animate-fade-in-up delay-200">
             Professional brokerage services for business owners, investors, and developers in the New Jersey metropolitan area.
           </p>
         </div>
-      </section>
+      </div>
 
       {/* Services Section */}
       <section className="py-24 px-6 max-w-7xl mx-auto border-b border-gray-100">
