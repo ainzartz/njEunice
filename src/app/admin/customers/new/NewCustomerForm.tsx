@@ -87,7 +87,14 @@ export default function NewCustomerForm() {
         });
       }
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      let finalValue = value;
+      if (name === 'minBaths' && value.includes('.')) {
+        const num = parseFloat(value);
+        if (!isNaN(num)) {
+          finalValue = (Math.floor(num) + 0.5).toString();
+        }
+      }
+      setFormData(prev => ({ ...prev, [name]: finalValue }));
     }
   };
 
