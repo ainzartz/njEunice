@@ -11,11 +11,25 @@ export default async function ContactPage() {
       <Navbar user={user} />
 
       {/* Hero / Header Section */}
-      <div className="relative bg-black text-white pt-32 pb-20 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-widest mb-4">Contact Us</h1>
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            Ready to start your real estate journey? Get in touch with us today.
+      <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/contact_hero.png"
+            alt="Luxury NJ Home"
+            className="w-full h-full object-cover scale-105 animate-subtle-zoom"
+          />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px]"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto text-center px-6 pt-20">
+          <h1 className="text-5xl md:text-7xl font-normal tracking-tight text-white mb-6 animate-fade-in-up [text-shadow:0_2px_10px_rgba(0,0,0,0.3)]">
+            Let's Start Your <br />
+            <span className="font-bold">Real Estate Journey</span>
+          </h1>
+          <p className="text-gray-300 max-w-2xl mx-auto text-xl font-light leading-relaxed animate-fade-in-up delay-200">
+            Expert guidance for buying, selling, and investing in New Jersey.
+            Eunice provides the precision and local insight you deserve.
           </p>
         </div>
       </div>

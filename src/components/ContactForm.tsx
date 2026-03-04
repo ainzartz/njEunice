@@ -160,7 +160,7 @@ export default function ContactForm() {
                 required
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
+                className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all duration-300"
                 placeholder="First Name"
               />
             </div>
@@ -173,7 +173,7 @@ export default function ContactForm() {
                 required
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors"
+                className="w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all duration-300"
                 placeholder="Last Name"
               />
             </div>
@@ -190,7 +190,7 @@ export default function ContactForm() {
                 disabled={emailVerified}
                 value={formData.email}
                 onChange={handleChange}
-                className={`flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors ${emailVerified ? 'bg-gray-100 text-gray-500' : ''}`}
+                className={`flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all duration-300 ${emailVerified ? 'bg-gray-100 text-gray-400' : ''}`}
                 placeholder="your@email.com"
               />
               {!emailVerified ? (
@@ -250,7 +250,7 @@ export default function ContactForm() {
               disabled={!emailVerified}
               value={formData.phone}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`}
+              className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all duration-300 ${!emailVerified ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''}`}
               placeholder={!emailVerified ? "Verify email to unlock" : "(555) 555-5555"}
             />
           </div>
@@ -265,7 +265,7 @@ export default function ContactForm() {
               rows={5}
               value={formData.message}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-colors resize-none ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`}
+              className={`w-full px-4 py-3 bg-white border border-gray-300 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all duration-300 resize-none ${!emailVerified ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''}`}
               placeholder={!emailVerified ? "Verify email to unlock" : "How can we help you?"}
             />
           </div>
@@ -279,12 +279,11 @@ export default function ContactForm() {
                   name="consent"
                   type="checkbox"
                   checked={consentChecked}
-                  disabled={!formData.message || formData.message.length === 0}
                   onChange={(e) => setConsentChecked(e.target.checked)}
-                  className={`h-4 w-4 text-black border-gray-300 rounded focus:ring-black ${(!formData.message || formData.message.length === 0) ? 'cursor-not-allowed opacity-50' : ''}`}
+                  className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
                 />
               </div>
-              <div className={`text-sm ${(!formData.message || formData.message.length === 0) ? 'opacity-50' : ''}`}>
+              <div className="text-sm">
                 <label htmlFor="consent" className="font-bold text-gray-900 block mb-1">
                   I consent to receive text messages and phone calls.
                 </label>
