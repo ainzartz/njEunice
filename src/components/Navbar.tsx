@@ -18,6 +18,7 @@ interface NavbarProps {
 
 const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -46,7 +47,10 @@ const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
         window.location.href = '/#about';
       }
     }
+    setIsMenuOpen(false); // Close mobile menu on click
   };
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const isLightMode = theme === 'light' || isScrolled;
 
@@ -139,24 +143,96 @@ const Navbar = ({ theme = 'transparent', user }: NavbarProps) => {
           ) : null}
         </div>
 
-        {/* Mobile Menu Button (Hamburger) - Placeholder */}
+        {/* Mobile Menu Button (Hamburger) */}
         <div className="md:hidden">
-          <button className={isLightMode ? '!text-black' : 'text-white'}>
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+          <button
+            onClick={toggleMenu}
+            className={`transition-colors ${isLightMode ? '!text-black' : 'text-white'}`}
+            aria-label="Toggle Menu"
+          >
+            {isMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`fixed inset-0 bg-white z-[60] transform transition-transform duration-500 ease-in-out md:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'
+          }`}
+      >
+        <div className="flex flex-col h-full bg-white">
+          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+            <span className="text-xl font-bold tracking-widest uppercase text-black">Menu</span>
+            <button onClick={toggleMenu} className="text-black p-2">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex-grow flex flex-col items-center justify-center space-y-8 py-12 px-6">
+            {['Buy', 'Sell', 'Lease', 'Commercial', 'About', 'Contact'].map((item) => {
+              const href = item === 'About' ? '/#about' : `/${item.toLowerCase()}`;
+              return (
+                <Link
+                  key={item}
+                  href={href}
+                  onClick={(e) => handleLinkClick(e, href)}
+                  className="text-2xl font-light uppercase tracking-[0.2em] text-black hover:text-gray-500 transition-colors"
+                >
+                  {item}
+                </Link>
+              );
+            })}
+
+            {user && (
+              <>
+                <div className="w-12 h-[1px] bg-gray-200 my-4"></div>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-sm font-bold uppercase tracking-widest text-black"
+                >
+                  Profile
+                </Link>
+                {user.isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-sm font-bold uppercase tracking-widest text-black"
+                  >
+                    Administrator
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    fetch('/api/auth/logout', { method: 'POST' }).then(() => {
+                      window.location.href = '/';
+                    });
+                  }}
+                  className="text-sm font-bold uppercase tracking-widest text-red-600 pt-4"
+                >
+                  Log out
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="p-8 text-center bg-gray-50">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest leading-loose">
+              460 Bergen Blvd. Suite 120 <br />
+              Palisades Park, NJ 07650 <br />
+              C: 201.290.5256
+            </p>
+          </div>
         </div>
       </div>
     </nav>
