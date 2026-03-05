@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function OptOutPage() {
   const [formData, setFormData] = useState({
@@ -10,13 +11,13 @@ export default function OptOutPage() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   // Email Verification State
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationStep, setVerificationStep] = useState<'idle' | 'sent' | 'verified'>('idle');
   const [verificationCodeInput, setVerificationCodeInput] = useState('');
   const [resendCountdown, setResendCountdown] = useState(0);
-  const [serverCodeHash, setServerCodeHash] = useState('');
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -38,12 +39,6 @@ export default function OptOutPage() {
     }));
   };
 
-  const sha256 = async (message: string) => {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  };
 
   const handleVerifyEmail = async () => {
     if (!formData.email) {
@@ -52,7 +47,8 @@ export default function OptOutPage() {
     }
 
     setVerificationStep('sent');
-    setResendCountdown(60);
+    setResendCountdown(180);
+    setVerificationCodeInput('');
 
     try {
       const response = await fetch('/api/email/verify', {
@@ -64,7 +60,7 @@ export default function OptOutPage() {
       const data = await response.json();
 
       if (data.success) {
-        setServerCodeHash(data.hash);
+        // Code sent successfully
       } else {
         alert("Failed to send email: " + (data.error || "Unknown error"));
         setVerificationStep('idle');
@@ -81,20 +77,29 @@ export default function OptOutPage() {
   const handleConfirmCode = async () => {
     if (!verificationCodeInput) return;
 
-    if (!serverCodeHash) {
-      alert("Please wait a moment while the email is being sent.");
-      return;
-    }
+    try {
+      const response = await fetch('/api/email/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          code: verificationCodeInput
+        }),
+      });
 
-    const inputHash = await sha256(verificationCodeInput);
+      const data = await response.json();
 
-    if (inputHash === serverCodeHash) {
-      setEmailVerified(true);
-      setVerificationStep('verified');
-      setVerificationCodeInput('');
-      setResendCountdown(0);
-    } else {
-      alert("Incorrect code. Please try again.");
+      if (data.success) {
+        setEmailVerified(true);
+        setVerificationStep('verified');
+        setVerificationCodeInput('');
+        setResendCountdown(0);
+      } else {
+        alert(data.message || "Incorrect or expired code. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error confirming code:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -115,6 +120,9 @@ export default function OptOutPage() {
 
       if (response.ok && data.success) {
         setSubmitted(true);
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
       } else {
         alert(data.error || 'Failed to process request. Please try again later.');
       }
@@ -150,7 +158,7 @@ export default function OptOutPage() {
                     required
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full border-b border-gray-300 py-2 bg-transparent focus:outline-none focus:border-black transition-colors"
+                    className="w-full border-b border-gray-300 py-2 bg-transparent focus:outline-none focus:border-black transition-colors text-black"
                   />
                 </div>
                 <div>
@@ -162,7 +170,7 @@ export default function OptOutPage() {
                     required
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full border-b border-gray-300 py-2 bg-transparent focus:outline-none focus:border-black transition-colors"
+                    className="w-full border-b border-gray-300 py-2 bg-transparent focus:outline-none focus:border-black transition-colors text-black"
                   />
                 </div>
               </div>
@@ -178,7 +186,7 @@ export default function OptOutPage() {
                     disabled={emailVerified || verificationStep === 'sent'}
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`flex-grow border-b border-gray-300 py-2 bg-transparent focus:outline-none focus:border-black transition-colors ${emailVerified ? 'text-gray-400' : 'text-black'}`}
+                    className={`flex-grow border-b border-gray-300 py-2 bg-transparent focus:outline-none focus:border-black transition-colors text-black`}
                   />
                   {!emailVerified && verificationStep !== 'sent' && (
                     <button

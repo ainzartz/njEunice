@@ -32,17 +32,27 @@ export async function GET(
     }
 
     // Decrypt sensitive information
+    const {
+      passwordHash,
+      firstNameEncrypted,
+      lastNameEncrypted,
+      phoneEncrypted,
+      addressEncrypted,
+      dobEncrypted,
+      interestCities,
+      ...userData
+    } = user;
+
     const decryptedUser = {
-      ...user,
-      firstName: user.firstNameEncrypted ? decrypt(user.firstNameEncrypted) : '',
-      lastName: user.lastNameEncrypted ? decrypt(user.lastNameEncrypted) : '',
-      phone: user.phoneEncrypted ? decrypt(user.phoneEncrypted) : '',
-      address: user.addressEncrypted ? decrypt(user.addressEncrypted) : '',
-      dob: user.dobEncrypted ? decrypt(user.dobEncrypted) : '',
-      passwordHash: undefined, // Hide password hash
-      hasPassword: !!user.passwordHash,
-      interestedCityIds: user.interestCities.map(ic => ic.cityId),
-      interestType: user.interestType,
+      ...userData,
+      firstName: firstNameEncrypted ? decrypt(firstNameEncrypted) : '',
+      lastName: lastNameEncrypted ? decrypt(lastNameEncrypted) : '',
+      phone: phoneEncrypted ? decrypt(phoneEncrypted) : '',
+      address: addressEncrypted ? decrypt(addressEncrypted) : '',
+      dob: dobEncrypted ? decrypt(dobEncrypted) : '',
+      hasPassword: !!passwordHash,
+      interestedCityIds: interestCities.map(ic => ic.cityId),
+      interestType: user.interestType || '',
       minPrice: user.minPrice,
       maxPrice: user.maxPrice,
       minBeds: user.minBeds,
@@ -67,7 +77,10 @@ export async function PATCH(
     }
 
     const { id } = await params;
+    if (!id) return NextResponse.json({ message: 'Missing ID' }, { status: 400 });
+
     const data = await req.json();
+    if (!data) return NextResponse.json({ message: 'Missing data' }, { status: 400 });
 
     const {
       email,
@@ -98,32 +111,53 @@ export async function PATCH(
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
+    // Check for email conflict
+    if (email && email !== existingUser.email) {
+      const conflict = await prisma.user.findUnique({ where: { email } });
+      if (conflict) {
+        return NextResponse.json({ message: 'Email already in use' }, { status: 409 });
+      }
+    }
+
     const updateData: any = {};
 
     if (email) updateData.email = email;
-    if (firstName) updateData.firstNameEncrypted = encrypt(firstName);
-    if (lastName) updateData.lastNameEncrypted = encrypt(lastName);
-    if (firstName || lastName) {
-      updateData.nameEncrypted = encrypt(`${firstName || ''} ${lastName || ''}`.trim());
+    if (firstName !== undefined) updateData.firstNameEncrypted = encrypt(firstName || '');
+    if (lastName !== undefined) updateData.lastNameEncrypted = encrypt(lastName || '');
+    if (firstName !== undefined || lastName !== undefined) {
+      const fName = firstName !== undefined ? firstName : (existingUser.firstNameEncrypted ? decrypt(existingUser.firstNameEncrypted) : '');
+      const lName = lastName !== undefined ? lastName : (existingUser.lastNameEncrypted ? decrypt(existingUser.lastNameEncrypted) : '');
+      updateData.nameEncrypted = encrypt(`${fName} ${lName}`.trim());
     }
     if (phone !== undefined) updateData.phoneEncrypted = encrypt(phone || '');
     if (address !== undefined) updateData.addressEncrypted = encrypt(address || '');
     if (dob !== undefined) updateData.dobEncrypted = encrypt(dob || '');
 
     if (data.isDeleted !== undefined) {
-      updateData.isDeleted = data.isDeleted;
+      updateData.isDeleted = !!data.isDeleted;
     }
 
-    updateData.autoEmail = !!autoEmail;
-    updateData.autoSms = !!autoSms;
-    updateData.isAdmin = !!isAdmin;
-    updateData.isLogin = !!isLogin;
+    if (autoEmail !== undefined) updateData.autoEmail = !!autoEmail;
+    if (autoSms !== undefined) updateData.autoSms = !!autoSms;
+    if (isAdmin !== undefined) updateData.isAdmin = !!isAdmin;
+    if (isLogin !== undefined) updateData.isLogin = !!isLogin;
 
-    updateData.interestType = interestType || null;
-    updateData.minPrice = minPrice ? parseInt(minPrice) : null;
-    updateData.maxPrice = maxPrice ? parseInt(maxPrice) : null;
-    updateData.minBeds = minBeds ? parseInt(minBeds) : null;
-    updateData.minBaths = minBaths ? parseFloat(minBaths) : null;
+    // Preference parsing with more robust checks
+    if (interestType !== undefined) {
+      updateData.interestType = (interestType && interestType !== '') ? interestType : null;
+    }
+
+    const parseNum = (v: any, isFloat = false) => {
+      if (v === undefined || v === null || v.toString().trim() === '') return null;
+      const clean = v.toString().replace(/,/g, '');
+      const num = isFloat ? parseFloat(clean) : parseInt(clean);
+      return isNaN(num) ? null : num;
+    };
+
+    if (minPrice !== undefined) updateData.minPrice = parseNum(minPrice);
+    if (maxPrice !== undefined) updateData.maxPrice = parseNum(maxPrice);
+    if (minBeds !== undefined) updateData.minBeds = parseNum(minBeds);
+    if (minBaths !== undefined) updateData.minBaths = parseNum(minBaths, true);
 
     let newPasswordHash: string | undefined = undefined;
     if (password) {
@@ -150,7 +184,7 @@ export async function PATCH(
       }
 
       // Update Interest Cities
-      if (interestedCityIds !== undefined) {
+      if (Array.isArray(interestedCityIds)) {
         // Delete all old interests
         await tx.userInterestCity.deleteMany({
           where: { userId: id }
@@ -172,9 +206,13 @@ export async function PATCH(
     });
 
     return NextResponse.json({ message: 'User updated successfully' });
-  } catch (error) {
-    console.error('Error updating user:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('DEBUG [PATCH API] ERROR:', error);
+    return NextResponse.json({
+      message: 'Internal Server Error',
+      error: error.message,
+      stack: error.stack
+    }, { status: 500 });
   }
 }
 

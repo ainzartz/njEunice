@@ -90,6 +90,27 @@ export default async function SellPage() {
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="py-24 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <img src="/images/sell_hero.png" alt="" className="w-full h-full object-cover grayscale" />
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 tracking-tight">
+            Ready to Unlock Your <span className="font-bold">Home's Potential?</span>
+          </h2>
+          <p className="text-xl text-gray-300 font-light leading-relaxed mb-12">
+            Experience the true value of your investment. Eunice delivers strategic marketing and elite representation to ensure your property commands the attention it deserves.
+          </p>
+          <a
+            href="/contact?type=sell"
+            className="inline-block bg-white text-black px-12 py-4 font-bold uppercase tracking-widest hover:bg-gray-200 transition-all duration-300 shadow-xl hover:scale-105"
+          >
+            Request Private Consultation
+          </a>
+        </div>
+      </section>
+
       <Footer />
     </main>
   );

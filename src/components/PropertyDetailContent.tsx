@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PropertyDetailContent({ id, mlsClass }: { id: number | string, mlsClass?: string }) {
   const [listing, setListing] = useState<any>(null);
@@ -26,13 +27,13 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+  const router = useRouter();
 
   // Email Verification State
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationStep, setVerificationStep] = useState<'idle' | 'sent' | 'verified'>('idle');
   const [verificationCodeInput, setVerificationCodeInput] = useState('');
   const [resendCountdown, setResendCountdown] = useState(0);
-  const [serverCodeHash, setServerCodeHash] = useState('');
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -60,12 +61,6 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
     }));
   };
 
-  const sha256 = async (message: string) => {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  };
 
   const handleVerifyEmail = async () => {
     if (!formData.email) {
@@ -74,7 +69,8 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
     }
 
     setVerificationStep('sent');
-    setResendCountdown(60);
+    setResendCountdown(180);
+    setVerificationCodeInput('');
 
     try {
       const response = await fetch('/api/email/verify', {
@@ -83,8 +79,9 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
         body: JSON.stringify({ email: formData.email }),
       });
       const data = await response.json();
+
       if (data.success) {
-        setServerCodeHash(data.hash);
+        // Code sent successfully
       } else {
         alert("Failed to send email: " + (data.error || "Unknown error"));
         setVerificationStep('idle');
@@ -100,18 +97,32 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
 
   const handleConfirmCode = async () => {
     if (!verificationCodeInput) return;
-    if (!serverCodeHash) {
-      alert("Please wait a moment while the email is being sent.");
-      return;
-    }
-    const inputHash = await sha256(verificationCodeInput);
-    if (inputHash === serverCodeHash) {
-      setEmailVerified(true);
-      setVerificationStep('verified');
-      setVerificationCodeInput('');
-      setResendCountdown(0);
-    } else {
-      alert("Incorrect code. Please try again.");
+
+    try {
+      const response = await fetch('/api/email/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          code: verificationCodeInput
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEmailVerified(true);
+        setVerificationStep('verified');
+        setVerificationCodeInput('');
+        setResendCountdown(0);
+      } else {
+        alert(data.message || "Incorrect or expired code. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error confirming code:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -246,6 +257,9 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
 
       if (response.ok && data.success) {
         setSubmitted(true);
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
       } else {
         alert(data.error || 'Failed to send inquiry. Please try again later.');
       }
@@ -510,7 +524,7 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
                 <div className="space-y-1">
                   <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-gray-700">Email Address *</label>
                   <div className="flex gap-2">
-                    <input type="email" id="email" name="email" required disabled={emailVerified} value={formData.email} onChange={handleFormChange} placeholder="your@email.com" className={`flex-1 min-w-0 bg-white border border-gray-300 p-2 text-sm text-gray-900 focus:outline-none focus:border-black placeholder-gray-400 block ${emailVerified ? 'bg-gray-100 text-gray-500' : ''}`} />
+                    <input type="email" id="email" name="email" required disabled={emailVerified} value={formData.email} onChange={handleFormChange} placeholder="your@email.com" className={`flex-1 min-w-0 bg-white border border-gray-300 p-2 text-sm text-black focus:outline-none focus:border-black placeholder-gray-400 block ${emailVerified ? 'bg-gray-100' : ''}`} />
                     {!emailVerified ? (
                       <button type="button" onClick={handleVerifyEmail} disabled={resendCountdown > 0 || !formData.email} className={`flex-shrink-0 px-3 font-bold uppercase tracking-wider text-xs transition-colors whitespace-nowrap min-w-[80px] ${resendCountdown > 0 || !formData.email ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-900'}`}>
                         {resendCountdown > 0 ? `Wait (${resendCountdown}s)` : (verificationStep === 'sent' ? 'Resend' : 'Verify')}
@@ -528,7 +542,7 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
                   <div className="space-y-2 bg-gray-100 p-3 mt-1 relative">
                     <label htmlFor="code" className="text-xs font-bold uppercase tracking-wider text-gray-700 block">Enter Code</label>
                     <div className="flex gap-2">
-                      <input type="text" id="code" value={verificationCodeInput} onChange={(e) => setVerificationCodeInput(e.target.value)} className="w-full px-2 py-1.5 bg-white border border-gray-300 focus:border-black text-sm text-gray-900 block outline-none" placeholder="6-digit code" maxLength={6} />
+                      <input type="text" id="code" value={verificationCodeInput} onChange={(e) => setVerificationCodeInput(e.target.value)} className="w-full px-2 py-1.5 bg-white border border-gray-300 focus:border-black text-sm text-black block outline-none" placeholder="6-digit code" maxLength={6} />
                       <button type="button" onClick={handleConfirmCode} className="bg-black text-white px-3 font-bold uppercase tracking-wider text-xs hover:bg-gray-900 transition-colors">
                         Confirm
                       </button>
@@ -538,12 +552,12 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
 
                 <div className="space-y-1 mt-2">
                   <label htmlFor="phone" className="text-xs font-bold uppercase tracking-wider text-gray-700">Phone (Optional)</label>
-                  <input type="tel" id="phone" name="phone" disabled={!emailVerified} value={formData.phone} onChange={handleFormChange} placeholder={!emailVerified ? "Verify email to unlock" : "(555) 555-5555"} className={`w-full bg-white border border-gray-300 p-2 text-sm text-gray-900 focus:outline-none focus:border-black placeholder-gray-400 block ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`} />
+                  <input type="tel" id="phone" name="phone" disabled={!emailVerified} value={formData.phone} onChange={handleFormChange} placeholder={!emailVerified ? "Verify email to unlock" : "(555) 555-5555"} className={`w-full bg-white border border-gray-300 p-2 text-sm text-black focus:outline-none focus:border-black placeholder-gray-400 block ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`} />
                 </div>
 
                 <div className="space-y-1 mt-2">
                   <label htmlFor="message" className="text-xs font-bold uppercase tracking-wider text-gray-700">Message *</label>
-                  <textarea id="message" name="message" required disabled={!emailVerified} rows={3} value={formData.message} onChange={handleFormChange} placeholder={!emailVerified ? "Verify email to unlock" : "I'm interested in this property."} className={`w-full bg-white border border-gray-300 p-2 text-sm text-gray-900 focus:outline-none focus:border-black placeholder-gray-400 block resize-none ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`} />
+                  <textarea id="message" name="message" required disabled={!emailVerified} rows={3} value={formData.message} onChange={handleFormChange} placeholder={!emailVerified ? "Verify email to unlock" : "I'm interested in this property."} className={`w-full bg-white border border-gray-300 p-2 text-sm text-black focus:outline-none focus:border-black placeholder-gray-400 block resize-none ${!emailVerified ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''}`} />
                 </div>
 
                 {/* Consent Checkbox */}

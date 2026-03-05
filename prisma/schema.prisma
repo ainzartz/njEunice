@@ -45,7 +45,21 @@ model User {
   isDeleted            Boolean              @default(false)
   messages             Message[]
 
+  // ㅕㅛ
+  interestType         InterestType?
+  minPrice             Int?
+  maxPrice             Int?
+  minBeds              Int?
+  minBaths             Float?
+
   @@map("users")
+}
+
+enum InterestType {
+  BUY
+  SELL
+  LEASE
+  COMMERCIAL
 }
 
 model PasswordHistory {
@@ -117,4 +131,15 @@ model PropertyImage {
 model MlsMetadata {
   id          String   @id @default("singleton")
   lastUpdated DateTime @default(now())
+}
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("verification_codes")
 }

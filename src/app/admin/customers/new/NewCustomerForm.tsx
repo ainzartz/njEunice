@@ -50,7 +50,7 @@ export default function NewCustomerForm() {
   const isPasswordValid = isLengthValid && hasNumber && hasSpecial && isMatch;
 
   useEffect(() => {
-    fetch('/api/counties')
+    fetch('/api/counties', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         setCounties(data);
@@ -96,6 +96,8 @@ export default function NewCustomerForm() {
       } else if (name === 'minPrice' || name === 'maxPrice') {
         const numericValue = value.replace(/[^0-9]/g, '');
         finalValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      } else if (name === 'phone') {
+        finalValue = value.replace(/\D/g, '');
       }
       setFormData(prev => ({ ...prev, [name]: finalValue }));
     }
@@ -184,7 +186,7 @@ export default function NewCustomerForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none" placeholder="e.g., 201-555-0123" />
+              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none" placeholder="e.g., 2015550123" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>

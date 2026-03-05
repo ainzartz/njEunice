@@ -64,8 +64,8 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
     const fetchData = async () => {
       try {
         const [countiesRes, userRes] = await Promise.all([
-          fetch('/api/counties'),
-          fetch(`/api/admin/customers/${id}`)
+          fetch('/api/counties', { cache: 'no-store' }),
+          fetch(`/api/admin/customers/${id}`, { cache: 'no-store' })
         ]);
 
         if (!countiesRes.ok || !userRes.ok) {
@@ -74,13 +74,14 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
 
         const countiesData = await countiesRes.json();
         const userData = await userRes.json();
+        console.log('Fetched user data:', userData);
 
         setCounties(countiesData);
         if (countiesData.length > 0) {
           setSelectedCountyId(countiesData[0].id);
         }
 
-        setFormData({
+        const initialFormData = {
           email: userData.email || '',
           password: '',
           passwordConfirm: '',
@@ -100,7 +101,9 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
           maxPrice: userData.maxPrice ? userData.maxPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '',
           minBeds: userData.minBeds?.toString() || '',
           minBaths: userData.minBaths?.toString() || ''
-        });
+        };
+        setFormData(initialFormData);
+        console.log('Initial form data state:', initialFormData);
         setHasPassword(userData.hasPassword || false);
       } catch (err: any) {
         setError(err.message);
@@ -147,6 +150,8 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
       } else if (name === 'minPrice' || name === 'maxPrice') {
         const numericValue = value.replace(/[^0-9]/g, '');
         finalValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      } else if (name === 'phone') {
+        finalValue = value.replace(/\D/g, '');
       }
       setFormData(prev => ({ ...prev, [name]: finalValue }));
     }
@@ -258,7 +263,7 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none" placeholder="e.g., 201-555-0123" />
+              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-black outline-none" placeholder="e.g., 2015550123" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>

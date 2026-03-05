@@ -84,6 +84,24 @@ export default async function LeasePage() {
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="py-24 bg-slate-50 relative overflow-hidden border-t border-gray-100">
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-light text-slate-900 mb-8 tracking-tight">
+            Find Your <span className="font-bold">Next Residence</span>
+          </h2>
+          <p className="text-xl text-gray-600 font-light leading-relaxed mb-12">
+            Find a residence that matches your lifestyle. Connect with Eunice to discover curated leasing opportunities in New Jersey's most sought-after communities.
+          </p>
+          <a
+            href="/contact?type=lease"
+            className="inline-block bg-black text-white px-12 py-4 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all duration-300 shadow-xl hover:scale-105"
+          >
+            Connect with Eunice
+          </a>
+        </div>
+      </section>
+
       <Footer />
     </main>
   );

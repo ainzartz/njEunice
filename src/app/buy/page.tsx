@@ -90,6 +90,24 @@ export default async function BuyPage() {
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="py-24 bg-slate-900 relative overflow-hidden">
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 tracking-tight">
+            Ready to Find Your <span className="font-bold">Next Chapter?</span>
+          </h2>
+          <p className="text-xl text-gray-300 font-light leading-relaxed mb-12">
+            Your journey to the perfect address begins with a conversation. Let Eunice guide you through the sophisticated New Jersey market with unparalleled expertise.
+          </p>
+          <a
+            href="/contact?type=buy"
+            className="inline-block bg-white text-black px-12 py-4 font-bold uppercase tracking-widest hover:bg-gray-200 transition-all duration-300 shadow-xl hover:scale-105"
+          >
+            Connect with Eunice
+          </a>
+        </div>
+      </section>
+
       <Footer />
     </main>
   );

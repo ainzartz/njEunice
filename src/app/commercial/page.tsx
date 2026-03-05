@@ -105,6 +105,27 @@ export default async function CommercialPage() {
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="py-24 bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <img src="/images/commercial_hero.png" alt="" className="w-full h-full object-cover grayscale" />
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-8 tracking-tight">
+            Elevate Your <span className="font-bold">Business Vision</span>
+          </h2>
+          <p className="text-xl text-gray-300 font-light leading-relaxed mb-12">
+            Strategic insight for your commercial ambitions. Partner with Eunice to navigate the complexities of New Jersey real estate and secure your business's future.
+          </p>
+          <a
+            href="/contact?type=commercial"
+            className="inline-block bg-white text-black px-12 py-4 font-bold uppercase tracking-widest hover:bg-gray-200 transition-all duration-300 shadow-xl hover:scale-105"
+          >
+            Consult with Eunice
+          </a>
+        </div>
+      </section>
+
       <Footer />
     </main>
   );

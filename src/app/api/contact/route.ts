@@ -6,7 +6,7 @@ import { encrypt } from '@/lib/encryption';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { firstName, lastName, email, phone, message, consent } = data;
+    const { firstName, lastName, email, phone, message, consent, preferences, interestCities } = data;
 
     if (!firstName || !lastName || !email || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -18,6 +18,16 @@ export async function POST(request: Request) {
     let user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
+
+    const userData = {
+      autoEmail: consent === true,
+      autoSms: consent === true,
+      interestType: preferences?.interestType || undefined,
+      minPrice: preferences?.minPrice ? parseInt(preferences.minPrice) : undefined,
+      maxPrice: preferences?.maxPrice ? parseInt(preferences.maxPrice) : undefined,
+      minBeds: preferences?.minBeds ? parseInt(preferences.minBeds) : undefined,
+      minBaths: preferences?.minBaths ? parseFloat(preferences.minBaths) : undefined,
+    };
 
     if (!user) {
       // Auto-register new user
@@ -37,20 +47,34 @@ export async function POST(request: Request) {
           phoneEncrypted,
           addressEncrypted,
           dobEncrypted,
-          autoEmail: consent === true,
-          autoSms: consent === true,
+          ...userData,
           isAdmin: false,
           isLogin: false,
         },
       });
-    } else if (consent === true) {
-      // Update existing user with consent 
+    } else {
+      // Update existing user with consent and preferences
       user = await prisma.user.update({
         where: { id: user.id },
-        data: {
-          autoEmail: true,
-          autoSms: true,
-        },
+        data: userData,
+      });
+    }
+
+    // 1.5 Handle Interest Cities
+    if (interestCities && Array.isArray(interestCities) && interestCities.length > 0) {
+      // Clean up old ones first to avoid duplicates or keep them? 
+      // User said "등록 할수있도록" - usually means overwrite or add.
+      // Let's go with overwrite behavior for simplicity in contact form.
+      await prisma.userInterestCity.deleteMany({
+        where: { userId: user.id }
+      });
+
+      await prisma.userInterestCity.createMany({
+        data: interestCities.map((cityId: string) => ({
+          userId: user.id,
+          cityId: cityId
+        })),
+        skipDuplicates: true,
       });
     }
 
