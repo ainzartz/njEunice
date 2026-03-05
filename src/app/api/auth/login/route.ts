@@ -49,42 +49,55 @@ export async function POST(request: NextRequest) {
       data: { lastLoginAt: new Date() },
     });
 
-    // Generate Token
-    const token = signToken({ userId: user.id, email: user.email, isAdmin: user.isAdmin });
+    // Credential verification successful. Now trigger 2FA dispatch.
 
-    // Check if password reset is required (90 days)
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes
 
-    let mustChangePassword = false;
-    if (user.lastPasswordChangeAt && user.lastPasswordChangeAt < ninetyDaysAgo) {
-      mustChangePassword = true;
-    }
-
-    const decryptedFirstName = user.firstNameEncrypted ? decrypt(user.firstNameEncrypted) : '';
-    const decryptedLastName = user.lastNameEncrypted ? decrypt(user.lastNameEncrypted) : '';
-
-    const response = NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: `${decryptedFirstName} ${decryptedLastName}`.trim(),
-        role: user.isAdmin ? 'ADMIN' : 'USER'
+    // Store in DB
+    await prisma.verificationCode.create({
+      data: {
+        email: user.email.toLowerCase().trim(),
+        code,
+        expiresAt,
       },
-      mustChangePassword,
-      redirect: mustChangePassword ? '/auth/update-password' : undefined
     });
 
-    // Set Cookie
-    response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24, // 1 day
-      path: '/',
+    // Send Email
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
-    return response;
+    const mailOptions = {
+      from: `"NJ Eunice Real Estate" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: 'Login Verification Code - NJ Eunice Real Estate',
+      text: `Your login verification code is: ${code}\n\nThis code will expire in 3 minutes.`,
+      html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                <h2 style="color: #000;">Login Verification</h2>
+                <p>Please use the following code to complete your sign-in:</p>
+                <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; font-size: 24px; letter-spacing: 5px; font-weight: bold; text-align: center; margin: 20px 0;">
+                    ${code}
+                </div>
+                <p style="font-size: 12px; color: #666;">This code will expire in 3 minutes. If you did not request this login, please change your password immediately.</p>
+            </div>
+        `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return NextResponse.json({
+      success: true,
+      mfaRequired: true,
+      email: user.email
+    });
 
   } catch (error) {
     console.error('Login error:', error);

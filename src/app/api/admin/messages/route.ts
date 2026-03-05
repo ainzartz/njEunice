@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth-server';
+import { ensureAdmin } from '@/lib/admin-auth';
 import { decrypt } from '@/lib/encryption';
 
 // GET all messages
 export async function GET() {
   try {
-    const currentUser = await getCurrentUser();
-
-    if (!currentUser || !currentUser.isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const adminAuth = await ensureAdmin();
+    if (!adminAuth.authorized) return adminAuth.response;
 
     const messages = await prisma.message.findMany({
       orderBy: { createdAt: 'desc' },

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth-server';
+import { ensureAdmin } from '@/lib/admin-auth';
 import bcrypt from 'bcryptjs';
 import { encrypt, decrypt } from '@/lib/encryption';
 
@@ -9,10 +9,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || !currentUser.isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const adminAuth = await ensureAdmin();
+    if (!adminAuth.authorized) return adminAuth.response;
 
     const { id } = await params;
 
@@ -71,10 +69,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || !currentUser.isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const adminAuth = await ensureAdmin();
+    if (!adminAuth.authorized) return adminAuth.response;
 
     const { id } = await params;
     if (!id) return NextResponse.json({ message: 'Missing ID' }, { status: 400 });
@@ -221,10 +217,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || !currentUser.isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const adminAuth = await ensureAdmin();
+    if (!adminAuth.authorized) return adminAuth.response;
+    const currentUser = adminAuth.user!;
 
     const { id } = await params;
 

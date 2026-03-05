@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth-server';
+import { ensureAdmin } from '@/lib/admin-auth';
 import bcrypt from 'bcryptjs';
 import { encrypt } from '@/lib/encryption';
 
 export async function POST(req: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
-
-    if (!currentUser || !currentUser.isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const adminAuth = await ensureAdmin();
+    if (!adminAuth.authorized) return adminAuth.response;
 
     const data = await req.json();
     const {

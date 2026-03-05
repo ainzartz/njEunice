@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth-server';
+import { ensureAdmin } from '@/lib/admin-auth';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentUser = await getCurrentUser();
-
-    if (!currentUser || !currentUser.isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const adminAuth = await ensureAdmin();
+    if (!adminAuth.authorized) return adminAuth.response;
 
     const { id } = await params;
 
