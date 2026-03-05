@@ -19,6 +19,5 @@ export async function sendEmail(to: string, subject: string, html: string) {
 
 export async function sendSMS(to: string, message: string) {
   // Mock SMS implementation
-  console.log(`[MOCK SMS] To: ${to}, Message: ${message}`);
   // In future, integrate Twilio or other provider here
 }

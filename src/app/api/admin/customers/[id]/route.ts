@@ -203,7 +203,6 @@ export async function PATCH(
 
     return NextResponse.json({ message: 'User updated successfully' });
   } catch (error: any) {
-    console.error('DEBUG [PATCH API] ERROR:', error);
     return NextResponse.json({
       message: 'Internal Server Error',
       error: error.message,

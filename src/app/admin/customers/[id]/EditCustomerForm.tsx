@@ -74,7 +74,6 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
 
         const countiesData = await countiesRes.json();
         const userData = await userRes.json();
-        console.log('Fetched user data:', userData);
 
         setCounties(countiesData);
         if (countiesData.length > 0) {
@@ -103,7 +102,6 @@ export default function EditCustomerForm({ id }: EditCustomerFormProps) {
           minBaths: userData.minBaths?.toString() || ''
         };
         setFormData(initialFormData);
-        console.log('Initial form data state:', initialFormData);
         setHasPassword(userData.hasPassword || false);
       } catch (err: any) {
         setError(err.message);

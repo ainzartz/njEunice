@@ -51,14 +51,12 @@ export class NJMLSService {
         headers: requestHeaders
       };
 
-      console.log(`[NJMLS] Request: ${method} ${url}`);
 
       const req = https.request(options, (res) => {
         let data = '';
         res.on('data', (chunk) => { data += chunk; });
         res.on('end', () => {
           if (res.statusCode && res.statusCode >= 400) {
-            console.error(`[NJMLS] Error ${res.statusCode}: ${data}`);
             reject(new Error(`Request failed with status ${res.statusCode}: ${data}`));
           } else {
             resolve({ body: data, headers: res.headers, statusCode: res.statusCode });
@@ -67,7 +65,6 @@ export class NJMLSService {
       });
 
       req.on('error', (e) => {
-        console.error(`[NJMLS] Network Error: ${e.message}`);
         reject(e);
       });
       req.end();
@@ -109,7 +106,6 @@ export class NJMLSService {
   }
 
   public async login(): Promise<void> {
-    console.log("[NJMLS] Logging in...");
     const res = await this.request(RETS_URL);
 
     // Capture cookies
@@ -130,7 +126,6 @@ export class NJMLSService {
         Logout: resolve(urls['Logout'])
       }
     };
-    console.log("[NJMLS] Login successful. Search URL:", this.session.urls.Search);
   }
 
   public async search(query: string, limit: number = 10) {

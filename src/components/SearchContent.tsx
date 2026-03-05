@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PropertyCard from '@/components/PropertyCard';
 import UnsupportedSearchArea from '@/components/UnsupportedSearchArea';
+import Footer from '@/components/Footer';
 
 export default function SearchContent() {
   const searchParams = useSearchParams();
@@ -101,7 +102,6 @@ export default function SearchContent() {
           setListings(data.data || []);
         }
       } catch (err: any) {
-        console.error(err);
         setError(err.message || 'Unable to load listings. Please try again later.');
       } finally {
         setLoading(false);
@@ -251,69 +251,101 @@ export default function SearchContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-gray-100 pb-8">
-        <div>
-          <h1 className="text-4xl font-light text-gray-900 mb-2">
+    <div className="flex flex-col h-full bg-white">
+      {/* Non-scrolling Header Section */}
+      <div className="max-w-7xl w-full mx-auto px-6 pt-6 pb-2">
+        <div className="pb-2 mb-2">
+          <h1 className="text-4xl font-light text-gray-900 mb-6">
             {isFeatured ? 'Featured Properties' : (
               <>Search Results {query && <span>for <span className="font-bold italic">"{query}"</span></span>}</>
             )}
           </h1>
-          <p className="text-gray-500 font-light">
-            {filteredListings.length} {filteredListings.length === 1 ? 'property' : 'properties'} found
-            {listings.length > filteredListings.length && ` (from ${listings.length} total)`}
-          </p>
-        </div>
 
-        <div className="flex flex-wrap lg:flex-nowrap items-center justify-end gap-10">
-          <div className="flex flex-wrap gap-4 items-center">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-2">Basic Filter:</span>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.residential}
-                onChange={() => toggleFilter('residential')}
-                className="w-4 h-4 accent-black rounded border-gray-300"
-              />
-              <span className={`text-sm tracking-tight transition-colors ${filters.residential ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Sale</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.rentals}
-                onChange={() => toggleFilter('rentals')}
-                className="w-4 h-4 accent-black rounded border-gray-300"
-              />
-              <span className={`text-sm tracking-tight transition-colors ${filters.rentals ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Lease</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.commercial}
-                onChange={() => toggleFilter('commercial')}
-                className="w-4 h-4 accent-black rounded border-gray-300"
-              />
-              <span className={`text-sm tracking-tight transition-colors ${filters.commercial ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Commercial</span>
-            </label>
+          <div className="flex flex-col space-y-4">
+            {/* Top Row: Count and Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <p className="text-gray-500 font-light text-sm">
+                {filteredListings.length} {filteredListings.length === 1 ? 'property' : 'properties'} found
+                {listings.length > filteredListings.length && ` (from ${listings.length} total)`}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-10">
+                <div className="flex flex-wrap gap-4 items-center">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-2">Basic Filter:</span>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={filters.residential}
+                      onChange={() => toggleFilter('residential')}
+                      className="w-4 h-4 accent-black rounded border-gray-300"
+                    />
+                    <span className={`text-sm tracking-tight transition-colors ${filters.residential ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Sale</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={filters.rentals}
+                      onChange={() => toggleFilter('rentals')}
+                      className="w-4 h-4 accent-black rounded border-gray-300"
+                    />
+                    <span className={`text-sm tracking-tight transition-colors ${filters.rentals ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Lease</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={filters.commercial}
+                      onChange={() => toggleFilter('commercial')}
+                      className="w-4 h-4 accent-black rounded border-gray-300"
+                    />
+                    <span className={`text-sm tracking-tight transition-colors ${filters.commercial ? 'text-black font-semibold' : 'text-gray-400 group-hover:text-gray-600'}`}>Commercial</span>
+                  </label>
+                </div>
+
+                <button
+                  onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+                  className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600 hover:text-blue-800 transition-colors py-2 group whitespace-nowrap"
+                >
+                  <span>Advance Filter</span>
+                  <svg
+                    className={`w-3 h-3 transition-transform duration-300 ${isAdvancedOpen ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Row: Active Filter Tags (No Borders) */}
+            {activeFilterTags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-0">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-1">Applied:</span>
+                {activeFilterTags.map(tag => (
+                  <button
+                    key={tag.id}
+                    onClick={() => removeFilter(tag.type, tag.value)}
+                    className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 text-black px-2 py-1 rounded-full text-[10px] font-medium transition-colors group"
+                  >
+                    <span>{tag.label}</span>
+                    <svg className="w-2.5 h-2.5 text-gray-400 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                ))}
+                <button
+                  onClick={handleResetAdvanced}
+                  className="text-[9px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors ml-1"
+                >
+                  Clear All
+                </button>
+              </div>
+            )}
           </div>
-
-          <button
-            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600 hover:text-blue-800 transition-colors py-2 group whitespace-nowrap"
-          >
-            <span>Advance Filter</span>
-            <svg
-              className={`w-3 h-3 transition-transform duration-300 ${isAdvancedOpen ? 'rotate-180' : ''}`}
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
         </div>
       </div>
 
       {/* Advanced Search Accordion */}
-      <div className={`overflow-hidden transition-all duration-500 ease-in-out border-b border-gray-100 ${isAdvancedOpen ? 'max-h-[800px] mb-12 opacity-100 py-8' : 'max-h-0 opacity-0 py-0'}`}>
+      <div className={`max-w-7xl w-full mx-auto px-6 overflow-hidden transition-all duration-500 ease-in-out ${isAdvancedOpen ? 'max-h-[800px] mb-8 opacity-100 py-8 border-b border-gray-100' : 'max-h-0 opacity-0 py-0'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Price Range */}
           <div className="space-y-4">
@@ -324,7 +356,7 @@ export default function SearchContent() {
                 placeholder="Min"
                 value={formatWithCommas(advFilters.minPrice)}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, ''); // Strictly only digits
+                  const val = e.target.value.replace(/\D/g, '');
                   setAdvFilters(prev => ({ ...prev, minPrice: val }));
                 }}
                 className="w-full bg-gray-50 border border-gray-200 rounded-sm px-3 py-2 text-sm text-black focus:outline-none focus:border-black focus:ring-0 placeholder:text-gray-400 transition-colors"
@@ -335,7 +367,7 @@ export default function SearchContent() {
                 placeholder="Max"
                 value={formatWithCommas(advFilters.maxPrice)}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, ''); // Strictly only digits
+                  const val = e.target.value.replace(/\D/g, '');
                   setAdvFilters(prev => ({ ...prev, maxPrice: val }));
                 }}
                 className="w-full bg-gray-50 border border-gray-200 rounded-sm px-3 py-2 text-sm text-black focus:outline-none focus:border-black focus:ring-0 placeholder:text-gray-400 transition-colors"
@@ -370,7 +402,7 @@ export default function SearchContent() {
           <div className="space-y-6">
             <div className="flex items-center justify-between gap-8">
               <div className="space-y-2">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Minimum Beds</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Min Beds</h4>
                 <div className="flex items-center border border-gray-200 rounded-sm bg-white overflow-hidden w-28">
                   <button
                     onClick={() => setAdvFilters(prev => ({ ...prev, beds: Math.max(0, prev.beds - 1) }))}
@@ -384,7 +416,7 @@ export default function SearchContent() {
                 </div>
               </div>
               <div className="space-y-2">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Minimum Baths</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Min Baths</h4>
                 <div className="flex items-center border border-gray-200 rounded-sm bg-white overflow-hidden w-28">
                   <button
                     onClick={() => setAdvFilters(prev => ({ ...prev, baths: Math.max(0, prev.baths - 1) }))}
@@ -417,62 +449,41 @@ export default function SearchContent() {
         </div>
       </div>
 
-      {/* Active Filter Tags */}
-      {activeFilterTags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 mb-8">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-1">Active Filters:</span>
-          {activeFilterTags.map(tag => (
-            <button
-              key={tag.id}
-              onClick={() => removeFilter(tag.type, tag.value)}
-              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-black px-3 py-1.5 rounded-full text-xs font-medium transition-colors group"
-            >
-              <span>{tag.label}</span>
-              <svg className="w-3 h-3 text-gray-400 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          ))}
-          <button
-            onClick={handleResetAdvanced}
-            className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors ml-2"
-          >
-            Clear All
-          </button>
+      {/* Scrollable Listings and Footer */}
+      <div className="flex-grow overflow-y-auto scroll-smooth">
+        <div className="max-w-7xl mx-auto px-6 pb-12 pt-4">
+          {error ? (
+            <div className="text-center py-20 bg-gray-50 rounded-lg border border-red-100">
+              <p className="text-red-500 mb-4">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-black font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-600 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : filteredListings.length === 0 ? (
+            <div className="text-center py-20 bg-gray-50 rounded-lg">
+              <p className="text-gray-500 mb-6 italic text-lg">
+                {listings.length === 0 ? 'No listings found matching your search.' : 'No listings match the selected filters.'}
+              </p>
+              <button
+                onClick={handleResetAdvanced}
+                className="text-black font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-600 transition-colors"
+              >
+                {listings.length === 0 ? 'Go Back' : 'Clear All Filters'}
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+              {filteredListings.map((listing) => (
+                <PropertyCard key={listing.L_ListingID} property={listing} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
-
-      {error ? (
-        <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-black font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-600 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      ) : filteredListings.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-          <p className="text-gray-500 mb-6 italic text-lg">
-            {listings.length === 0 ? 'No listings found matching your search.' : 'No listings match the selected filters.'}
-          </p>
-          <button
-            onClick={handleResetAdvanced}
-            className="text-black font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-600 transition-colors"
-          >
-            {listings.length === 0 ? 'Go Back' : 'Clear All Filters'}
-          </button>
-        </div>
-      ) : (
-        <div className="custom-scrollbar pr-4 -mr-4 max-h-[calc(100vh-450px)] overflow-y-auto overflow-x-hidden scroll-smooth min-h-[400px]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 pb-12">
-            {filteredListings.map((listing) => (
-              <PropertyCard key={listing.L_ListingID} property={listing} />
-            ))}
-          </div>
-        </div>
-      )}
+        <Footer />
+      </div>
     </div>
   );
 }

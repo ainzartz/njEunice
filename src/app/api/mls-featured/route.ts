@@ -80,7 +80,6 @@ export async function GET(request: Request) {
 
     // Fallback: If no office listings found at all, get latest active residential listings
     if (parsedData.length === 0) {
-      console.log('No office listings found in any class, using fallback to newest active listings.');
       const fallbackQuery = '(L_StatusCatID=1)';
       const fallbackUrl = new URL(`https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/search`);
       fallbackUrl.searchParams.append('SearchType', 'Property');

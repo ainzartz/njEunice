@@ -58,7 +58,7 @@ export default function NewCustomerForm() {
           setSelectedCountyId(data[0].id);
         }
       })
-      .catch(err => console.error("Failed to load counties", err));
+      .catch(err => { });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

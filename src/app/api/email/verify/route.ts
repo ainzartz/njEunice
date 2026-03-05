@@ -14,7 +14,6 @@ export async function POST(request: Request) {
     const pass = process.env.EMAIL_PASS;
 
     if (!user || !pass) {
-      console.error('Missing EMAIL_USER or EMAIL_PASS environment variables');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -31,9 +30,7 @@ export async function POST(request: Request) {
           expiresAt,
         },
       });
-      console.log('Verification code stored in DB');
     } catch (dbError: any) {
-      console.error('Error storing verification code in DB:', dbError);
       return NextResponse.json({
         error: 'Failed to initialize verification',
         details: dbError.message || 'Database connection or schema error'
@@ -67,9 +64,7 @@ export async function POST(request: Request) {
 
     try {
       await transporter.sendMail(mailOptions);
-      console.log('Verification email sent to:', email);
     } catch (mailError: any) {
-      console.error('Nodemailer Error:', mailError);
       return NextResponse.json({
         error: 'Failed to send email',
         details: mailError.message || 'Gmail service error'
@@ -78,7 +73,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Top-level error in email verify route:', error);
     return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
 }

@@ -92,12 +92,10 @@ export async function POST(request: Request) {
                 cityId: zipRecord.cityId
               }
             });
-            console.log(`Linked user ${user.id} to interested city ${zipRecord.city.name} (Zip: ${propertyZip})`);
           }
         }
       } catch (zipError) {
-        console.error("Error mapping ZipCode to UserInterestCity:", zipError);
-        // We don't want to fail the entire submission if zip mapping fails
+        // Ignore zip mapping errors silently
       }
     }
 
@@ -159,7 +157,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Property inquiry sent successfully' });
   } catch (error) {
-    console.error('Error processing property inquiry submission:', error);
     return NextResponse.json({ error: 'Failed to process inquiry' }, { status: 500 });
   }
 }

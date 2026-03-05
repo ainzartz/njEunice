@@ -25,7 +25,6 @@ const PropertyCard = ({ property: listing }: any) => {
           }
         })
         .catch(err => {
-          console.error("Error fetching image for", listing.L_ListingID, err);
           setImageUrl(null);
         })
         .finally(() => {
@@ -79,7 +78,7 @@ const PropertyCard = ({ property: listing }: any) => {
         year: 'numeric'
       });
     } catch (e) {
-      console.error("Error formatting date", dateStr, e);
+      // Quietly fail
     }
   }
 

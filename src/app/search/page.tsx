@@ -8,16 +8,14 @@ export default async function SearchPage() {
   const user = await getCurrentUser();
 
   return (
-    <main className="min-h-screen bg-white font-sans flex flex-col">
+    <main className="h-screen bg-white font-sans flex flex-col overflow-hidden">
       <Navbar theme="light" user={user} />
 
-      <div className="flex-grow pt-20"> {/* PT-20 for fixed navbar */}
+      <div className="flex-grow pt-20 flex flex-col min-h-0"> {/* PT-20 for fixed navbar, flex-col and min-h-0 for proper flex sizing */}
         <Suspense fallback={<div className="p-12 text-center">Loading search...</div>}>
           <SearchContent />
         </Suspense>
       </div>
-
-      <Footer />
     </main>
   );
 }
