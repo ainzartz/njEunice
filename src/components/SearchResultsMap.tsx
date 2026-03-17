@@ -22,20 +22,53 @@ export default function SearchResultsMap({ listings }: SearchResultsMapProps) {
   const geocodeCache = useRef<Map<string, google.maps.LatLngLiteral>>(new Map());
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [isGeocodingComplete, setIsGeocodingComplete] = useState(false);
+  const [showPins, setShowPins] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  // Rate limiting to prevent RPA/automated cost inflation
+  useEffect(() => {
+    try {
+      const STORAGE_KEY = 'nj_map_usage_stats';
+      const LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+      const MAX_LOADS = 20;
+
+      const now = Date.now();
+      const rawData = sessionStorage.getItem(STORAGE_KEY);
+      let stats = rawData ? JSON.parse(rawData) : { count: 0, firstLoad: now };
+
+      // Reset if window has passed
+      if (now - stats.firstLoad > LIMIT_WINDOW_MS) {
+        stats = { count: 1, firstLoad: now };
+      } else {
+        stats.count += 1;
+      }
+
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+
+      if (stats.count > MAX_LOADS) {
+        console.error("Map usage limit exceeded. Potential bot activity detected.");
+        setIsBlocked(true);
+      }
+    } catch (e) {
+      console.warn("Failed to check map usage limits:", e);
+    }
+  }, []);
 
   // Default center to Fort Lee if no coordinates are available
   const defaultCenter = useMemo(() => ({ lat: 40.8509, lng: -73.9701 }), []);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || isBlocked) return;
     if (listings.length === 0) {
       setGeocodedListings([]);
       setIsGeocodingComplete(true);
+      setShowPins(true);
       return;
     }
 
     let isActive = true;
     setIsGeocodingComplete(false);
+    setShowPins(false);
     const processGeocoding = async () => {
       const geocoder = new window.google.maps.Geocoder();
       const newGeocodedListings: any[] = [];
@@ -136,16 +169,52 @@ export default function SearchResultsMap({ listings }: SearchResultsMapProps) {
 
       if (hasValidPoints) {
         mapInstance.fitBounds(bounds);
+
+        // Fallback timeout in case the map bounds don't actually change
+        // (Google Maps won't fire 'idle' if it doesn't need to move)
+        let isIdleFired = false;
+        const fallbackTimer = setTimeout(() => {
+          if (!isIdleFired) {
+            setShowPins(true);
+          }
+        }, 800);
+
         // Optional: Ensure it doesn't zoom in *too* far if there's only 1 or 2 pins
         const listener = window.google.maps.event.addListener(mapInstance, 'idle', () => {
+          isIdleFired = true;
+          clearTimeout(fallbackTimer);
           if (mapInstance.getZoom()! > 16) {
             mapInstance.setZoom(16);
           }
+          setShowPins(true);
           window.google.maps.event.removeListener(listener);
         });
+      } else {
+        setShowPins(true);
       }
     }
   }, [mapInstance, geocodedListings, isGeocodingComplete]);
+
+  if (isBlocked) {
+    return (
+      <div className="w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-gray-50 rounded-lg border border-gray-200 p-8 text-center">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md">
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m12-3V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2h11.586l4.707 4.707C19.823 24.234 21 23.527 21 22.586V20a2 2 0 002-2v-1z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Temporary Access Limitation</h3>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            We have detected an unusually high volume of map requests from your session. To ensure a stable experience for everyone, map access has been temporarily limited.
+          </p>
+          <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            Please try again in about an hour or contact support if you believe this is an error.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loadError) {
     return (
@@ -174,6 +243,12 @@ export default function SearchResultsMap({ listings }: SearchResultsMapProps) {
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 shadow-sm relative">
+      {!showPins && listings.length > 0 && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm transition-opacity duration-300">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mb-4"></div>
+          <p className="text-gray-700 font-semibold tracking-wide">Mapping properties...</p>
+        </div>
+      )}
       <GoogleMap
         mapContainerClassName="w-full h-full"
         center={defaultCenter}
@@ -181,12 +256,7 @@ export default function SearchResultsMap({ listings }: SearchResultsMapProps) {
         onLoad={map => setMapInstance(map)}
         options={{
           styles: [
-            // Subtle, clean map style
-            { featureType: "all", elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-            { featureType: "all", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
-            { featureType: "all", elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
-            { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9e2f5" }] },
-            // Hide POIs to keep map clean for property pins
+            // Hide POIs to keep map clean for property pins but leave normal roads/colors alone
             { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
             { featureType: "poi", elementType: "geometry", stylers: [{ visibility: "off" }] },
             { featureType: "transit", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
@@ -198,7 +268,7 @@ export default function SearchResultsMap({ listings }: SearchResultsMapProps) {
         }}
         onClick={() => setActiveMarker(null)} // Close info window when clicking on map
       >
-        {geocodedListings.map((listing) => {
+        {showPins && geocodedListings.map((listing) => {
           const isRent = listing.propertyType === 'rent' || listing.L_SaleRent === 'R';
           const price = listing.L_AskingPrice ? parseInt(listing.L_AskingPrice, 10) : 0;
           const displayPrice = isRent ? `${formatter.format(price)}/mo` : formatter.format(price);

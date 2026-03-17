@@ -1,11 +1,12 @@
 "use client";
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import PropertyCard from '@/components/PropertyCard';
 import UnsupportedSearchArea from '@/components/UnsupportedSearchArea';
 import Footer from '@/components/Footer';
 import SearchResultsMap from '@/components/SearchResultsMap';
+import { SearchSkeleton } from '@/components/SearchSkeleton';
 import { Map, LayoutGrid } from 'lucide-react';
 
 export default function SearchContent() {
@@ -116,43 +117,45 @@ export default function SearchContent() {
     fetchListings();
   }, [query]);
 
-  // Derived filtered listings
-  const filteredListings = listings.filter(item => {
-    const cls = item.mlsClass;
-    const isRes = ['RE_1', 'CT_3', 'MF_2'].includes(cls);
-    const isRent = cls === 'RN_4';
-    const isComm = ['CM_5', 'BU_7'].includes(cls);
+  // Derived filtered listings memoized to prevent Map re-render on input changes
+  const filteredListings = useMemo(() => {
+    return listings.filter(item => {
+      const cls = item.mlsClass;
+      const isRes = ['RE_1', 'CT_3', 'MF_2'].includes(cls);
+      const isRent = cls === 'RN_4';
+      const isComm = ['CM_5', 'BU_7'].includes(cls);
 
-    // Basic Categories
-    let match = false;
-    if (filters.residential && isRes) match = true;
-    if (filters.rentals && isRent) match = true;
-    if (filters.commercial && isComm) match = true;
+      // Basic Categories
+      let match = false;
+      if (filters.residential && isRes) match = true;
+      if (filters.rentals && isRent) match = true;
+      if (filters.commercial && isComm) match = true;
 
-    if (!match) return false;
+      if (!match) return false;
 
-    // Advanced Filters
-    const f = appliedAdvFilters;
+      // Advanced Filters
+      const f = appliedAdvFilters;
 
-    // Price
-    const price = parseInt(item.L_AskingPrice || '0', 10);
-    if (f.minPrice && price < parseInt(f.minPrice, 10)) return false;
-    if (f.maxPrice && price > parseInt(f.maxPrice, 10)) return false;
+      // Price
+      const price = parseInt(item.L_AskingPrice || '0', 10);
+      if (f.minPrice && price < parseInt(f.minPrice, 10)) return false;
+      if (f.maxPrice && price > parseInt(f.maxPrice, 10)) return false;
 
-    // Beds / Baths
-    const itemBeds = parseInt(item.LM_Int1_1 || item.L_BedroomsTotal || '0', 10);
-    const itemBaths = parseInt(item.LM_Int1_19 || item.L_BathsFull || '0', 10);
-    if (f.beds > 0 && itemBeds < f.beds) return false;
-    if (f.baths > 0 && itemBaths < f.baths) return false;
+      // Beds / Baths
+      const itemBeds = parseInt(item.LM_Int1_1 || item.L_BedroomsTotal || '0', 10);
+      const itemBaths = parseInt(item.LM_Int1_19 || item.L_BathsFull || '0', 10);
+      if (f.beds > 0 && itemBeds < f.beds) return false;
+      if (f.baths > 0 && itemBaths < f.baths) return false;
 
-    // Style
-    if (f.selectedStyles.length > 0) {
-      const pType = getPropertyType(item.L_Type_, item.mlsClass, item.LM_Char10_7);
-      if (!pType || !f.selectedStyles.includes(pType)) return false;
-    }
+      // Style
+      if (f.selectedStyles.length > 0) {
+        const pType = getPropertyType(item.L_Type_, item.mlsClass, item.LM_Char10_7);
+        if (!pType || !f.selectedStyles.includes(pType)) return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [listings, filters, appliedAdvFilters]);
 
   const handleApplyFilters = () => {
     setAppliedAdvFilters({ ...advFilters });
@@ -229,27 +232,6 @@ export default function SearchContent() {
   };
 
   const activeFilterTags = getActiveFilterTags();
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-8 animate-pulse">
-          <div className="h-10 bg-gray-100 w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-100 w-1/4"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="animate-pulse">
-              <div className="bg-gray-100 aspect-[4/3] w-full mb-4 rounded-xl"></div>
-              <div className="h-4 bg-gray-100 w-1/3 mb-2"></div>
-              <div className="h-4 bg-gray-100 w-2/3 mb-4"></div>
-              <div className="h-4 bg-gray-100 w-full mb-1"></div>
-              <div className="h-4 bg-gray-100 w-5/6"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   if (unsupportedData) {
     return <UnsupportedSearchArea supportedData={unsupportedData} />;
@@ -482,7 +464,19 @@ export default function SearchContent() {
       {/* Scrollable Listings and Footer */}
       <div className="flex-grow overflow-y-auto scroll-smooth">
         <div className="max-w-7xl mx-auto px-6 pb-12 pt-4">
-          {error ? (
+          {loading ? (
+            viewMode === 'map' ? (
+              <div className="w-full h-[600px] bg-gray-50 rounded-lg border border-gray-200 flex flex-col items-center justify-center animate-pulse">
+                <div className="relative w-20 h-20 mb-6">
+                  <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <p className="text-gray-500 font-medium tracking-widest uppercase text-xs">Initializing Map Search...</p>
+              </div>
+            ) : (
+              <SearchSkeleton />
+            )
+          ) : error ? (
             <div className="text-center py-20 bg-gray-50 rounded-lg border border-red-100">
               <p className="text-red-500 mb-4">{error}</p>
               <button

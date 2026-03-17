@@ -1,7 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { translateToKorean } from '@/lib/gemini';
+import { ensureInternalRequest } from '@/lib/api-auth';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Security check: only allow requests from our own domain
+  const authError = ensureInternalRequest(request);
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { text } = body;

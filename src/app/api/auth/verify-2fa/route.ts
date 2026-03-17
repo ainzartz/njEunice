@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { signToken } from '@/lib/jwt';
 import { decrypt } from '@/lib/encryption';
+import { ensureInternalRequest } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
+  // Security check: only allow requests from our own domain
+  const authError = ensureInternalRequest(request);
+  if (authError) return authError;
+
   try {
     const { email, code } = await request.json();
 

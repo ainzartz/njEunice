@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ensureInternalRequest } from '@/lib/api-auth';
 
 export async function GET(req: NextRequest) {
+  // Security check: only allow requests from our own domain
+  const authError = ensureInternalRequest(req);
+  if (authError) return authError;
+
   try {
     const counties = await prisma.county.findMany({
       where: {

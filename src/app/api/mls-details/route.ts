@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { updateMlsMetadata } from '@/lib/mls-metadata';
+import { ensureInternalRequest } from '@/lib/api-auth';
 
 const username = '9500181';
 const password = 'Sun$3t!620w';
@@ -37,7 +38,11 @@ function parseRETSCompact(xmlText: string) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  // Security check: only allow requests from our own domain
+  const authError = ensureInternalRequest(request);
+  if (authError) return authError;
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   const providedClass = searchParams.get('class');

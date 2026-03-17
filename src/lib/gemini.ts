@@ -10,7 +10,10 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const getGeminiModel = () => {
-  return genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  return genAI.getGenerativeModel(
+    { model: "gemini-flash-latest" },
+    { customHeaders: { Referer: "https://www.sellbyeunice.com" } }
+  );
 };
 
 // Scrape Mortgage News Daily for 30Y and 15Y Fixed Rates
@@ -165,7 +168,7 @@ export const translateToKorean = async (text: string): Promise<string> => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text().trim();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error translating to Korean:", error);
     return "번역 중 오류가 발생했습니다. 나중에 다시 시도해주세요.";
   }

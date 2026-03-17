@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 import { decrypt } from '@/lib/encryption';
+import { ensureInternalRequest } from '@/lib/api-auth';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Security check: only allow requests from our own domain
+  const authError = ensureInternalRequest(request);
+  if (authError) return authError;
+
   try {
     const { firstName, lastName, email } = await request.json();
 

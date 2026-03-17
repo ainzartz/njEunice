@@ -1,9 +1,14 @@
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import prisma from "@/lib/db";
+import { ensureInternalRequest } from "@/lib/api-auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Security check: only allow requests from our own domain
+  const authError = ensureInternalRequest(request);
+  if (authError) return authError;
+
   try {
     const latestInsight = await prisma.marketInsight.findFirst({
       orderBy: {
