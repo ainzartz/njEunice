@@ -75,12 +75,19 @@ export async function GET(request: NextRequest) {
       return parsed.map(item => ({ ...item, propertyType: type, mlsClass: cls }));
     };
 
-    // Try multiple classes for office listings
-    const re1Listings = await fetchFromClass('RE_1', 12, 'sale');
-    const ct3Listings = await fetchFromClass('CT_3', 6, 'sale');
-    const rn4Listings = await fetchFromClass('RN_4', 6, 'rent');
+    const { searchParams } = new URL(request.url);
+    const all = searchParams.get('all') === 'true';
+    const limitPerClass = all ? 100 : 12;
 
-    let parsedData = [...re1Listings, ...ct3Listings, ...rn4Listings];
+    // Try multiple classes for office listings
+    const re1Listings = await fetchFromClass('RE_1', limitPerClass, 'sale');
+    const ct3Listings = await fetchFromClass('CT_3', limitPerClass, 'sale');
+    const mf2Listings = await fetchFromClass('MF_2', limitPerClass, 'sale');
+    const ld6Listings = await fetchFromClass('LD_6', limitPerClass, 'sale');
+    const cm5Listings = await fetchFromClass('CM_5', limitPerClass, 'sale');
+    const rn4Listings = await fetchFromClass('RN_4', limitPerClass, 'rent');
+
+    let parsedData = [...re1Listings, ...ct3Listings, ...mf2Listings, ...ld6Listings, ...cm5Listings, ...rn4Listings];
     let isFallback = false;
 
     // Fallback: If no office listings found at all, get latest active residential listings
@@ -102,15 +109,13 @@ export async function GET(request: NextRequest) {
       isFallback = true;
     }
 
-    // Sort combined data by date (newest first)
+    // Sorted combined data by date (newest first)
     parsedData.sort((a, b) => {
       const dateA = a.L_ListingDate || '';
       const dateB = b.L_ListingDate || '';
       return dateB.localeCompare(dateA);
     });
 
-    const { searchParams } = new URL(request.url);
-    const all = searchParams.get('all') === 'true';
 
     // Limit to 6 for the homepage if not fallback AND not requested all
     if (!isFallback && !all) {
