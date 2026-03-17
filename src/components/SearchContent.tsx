@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import PropertyCard from '@/components/PropertyCard';
 import UnsupportedSearchArea from '@/components/UnsupportedSearchArea';
 import Footer from '@/components/Footer';
+import SearchResultsMap from '@/components/SearchResultsMap';
+import { Map, LayoutGrid } from 'lucide-react';
 
 export default function SearchContent() {
   const searchParams = useSearchParams();
@@ -23,6 +25,9 @@ export default function SearchContent() {
     rentals: true,
     commercial: true
   });
+
+  // View Mode State
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Advanced Search States
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -264,10 +269,34 @@ export default function SearchContent() {
           <div className="flex flex-col space-y-4">
             {/* Top Row: Count and Controls */}
             <div className="flex flex-wrap items-center justify-between gap-6">
-              <p className="text-gray-500 font-light text-sm">
-                {filteredListings.length} {filteredListings.length === 1 ? 'property' : 'properties'} found
-                {listings.length > filteredListings.length && ` (from ${listings.length} total)`}
-              </p>
+              <div className="flex items-center gap-4">
+                <p className="text-gray-500 font-light text-sm">
+                  {filteredListings.length} {filteredListings.length === 1 ? 'property' : 'properties'} found
+                  {listings.length > filteredListings.length && ` (from ${listings.length} total)`}
+                </p>
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${viewMode === 'list'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-gray-500 hover:text-gray-900'
+                      }`}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${viewMode === 'map'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-gray-500 hover:text-gray-900'
+                      }`}
+                  >
+                    <Map className="w-4 h-4" />
+                    Map
+                  </button>
+                </div>
+              </div>
 
               <div className="flex flex-wrap items-center gap-10">
                 <div className="flex flex-wrap gap-4 items-center">
@@ -345,7 +374,7 @@ export default function SearchContent() {
       </div>
 
       {/* Advanced Search Accordion */}
-      <div className={`max-w-7xl w-full mx-auto px-6 overflow-hidden transition-all duration-500 ease-in-out ${isAdvancedOpen ? 'max-h-[800px] mb-8 opacity-100 py-8 border-b border-gray-100' : 'max-h-0 opacity-0 py-0'}`}>
+      <div className={`max-w-7xl w-full mx-auto px-6 transition-all duration-300 ease-in-out ${isAdvancedOpen ? 'opacity-100 py-8 border-b border-gray-100 mb-8' : 'h-0 overflow-hidden opacity-0 py-0'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Price Range */}
           <div className="space-y-4">
@@ -430,22 +459,23 @@ export default function SearchContent() {
                 </div>
               </div>
             </div>
-
-            <div className="flex gap-4 pt-4">
-              <button
-                onClick={handleApplyFilters}
-                className="flex-grow bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] py-3 rounded-sm hover:bg-gray-800 transition-colors shadow-lg shadow-black/5"
-              >
-                Apply Filters
-              </button>
-              <button
-                onClick={handleResetAdvanced}
-                className="px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors"
-              >
-                Reset
-              </button>
-            </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end gap-4">
+          <button
+            onClick={handleResetAdvanced}
+            className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 hover:text-black transition-colors"
+          >
+            Clear Filters
+          </button>
+          <button
+            onClick={handleApplyFilters}
+            className="px-10 py-3 bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] rounded-sm hover:bg-gray-800 transition-colors shadow-lg shadow-black/5"
+          >
+            Apply Filters
+          </button>
         </div>
       </div>
 
@@ -474,6 +504,8 @@ export default function SearchContent() {
                 {listings.length === 0 ? 'Go Back' : 'Clear All Filters'}
               </button>
             </div>
+          ) : viewMode === 'map' ? (
+            <SearchResultsMap listings={filteredListings} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {filteredListings.map((listing) => (

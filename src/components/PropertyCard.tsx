@@ -13,6 +13,14 @@ const PropertyCard = ({ property: listing }: any) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Use pre-fetched cached image if available (eliminates N+1 fetches)
+    if (listing.cachedImageUrl) {
+      setImageUrl(listing.cachedImageUrl);
+      setIsImageLoading(false);
+      return;
+    }
+
+    // 2. Fallback to individual fetch if not cached
     if (listing.L_ListingID) {
       setIsImageLoading(true);
       fetch(`/api/mls-image?id=${listing.L_ListingID}`)
@@ -33,7 +41,7 @@ const PropertyCard = ({ property: listing }: any) => {
     } else {
       setIsImageLoading(false);
     }
-  }, [listing.L_ListingID]);
+  }, [listing.L_ListingID, listing.cachedImageUrl]);
 
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -104,7 +112,8 @@ const PropertyCard = ({ property: listing }: any) => {
       case '18':
       case '28':
         return isSaleClass ? 'Single Family' : 'Apartment';
-      case '12': return 'Condo';
+      case '12':
+      case '13': return 'Condo';
       case '14': return 'Co-op';
       case '16': return 'Multi-Floor';
       case '17':
@@ -192,13 +201,21 @@ const PropertyCard = ({ property: listing }: any) => {
             {address}{unit}, {city} {state} {zip}
           </p>
 
-          {propertyTypeName && (
-            <div className="mt-2">
+          <div className="mt-2 flex justify-between items-center min-h-[20px]">
+            {propertyTypeName ? (
               <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em]">
                 {propertyTypeName}
               </span>
+            ) : <div />}
+            <div className="relative h-4 w-20">
+              <Image
+                src="/images/njmls_logo.png"
+                alt="NJMLS IDX"
+                fill
+                className="object-contain opacity-70"
+              />
             </div>
-          )}
+          </div>
 
           <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-50">
             {formattedDate ? (

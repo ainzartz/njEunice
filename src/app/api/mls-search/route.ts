@@ -242,6 +242,36 @@ export async function GET(request: Request) {
       return dateB.localeCompare(dateA);
     });
 
+    // 4.5 Batch Fetch Cached Images
+    try {
+      const listingIds = parsedData.map(item => item.L_ListingID).filter(Boolean);
+      if (listingIds.length > 0) {
+        const cachedImages = await prisma.propertyImage.findMany({
+          where: {
+            listingId: { in: listingIds }
+          },
+          select: {
+            listingId: true,
+            urls: true
+          }
+        });
+
+        const imageMap = new Map();
+        cachedImages.forEach(img => {
+          if (img.urls && img.urls.length > 0) {
+            imageMap.set(img.listingId, img.urls[0]);
+          }
+        });
+
+        // Attach cached images directly to the payload
+        parsedData.forEach(item => {
+          item.cachedImageUrl = imageMap.get(item.L_ListingID) || null;
+        });
+      }
+    } catch (imgError) {
+      console.warn("Failed to bulk fetch cached images:", imgError);
+    }
+
     // 5. Logout (ALWAYS)
     const logoutUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/logout`;
     await fetch(logoutUrl, { method: 'GET', headers: authHeaders });

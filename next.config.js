@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'zimg.paragon.ice.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'njmls.mlsmatrix.com',
+      },
     ],
   },
 };

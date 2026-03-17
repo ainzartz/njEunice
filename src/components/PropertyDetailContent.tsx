@@ -203,6 +203,9 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
   const bathsFull = listing.L_BathsFull || listing.LM_Int1_19 || '-';
   const bathsHalf = listing.L_BathsHalf || listing.LM_Int1_20 || '0';
   const sqft = listing.L_SquareFeet || listing.LM_Int4_4 || 'N/A'; // NJMLS SandBox often omits SqFt, so 'N/A' is expected
+  const agentPhone = listing.LA1_PhoneNumber1 || listing.LA1_PhoneNumber2 || '';
+  const agentEmail = listing.LA1_Email || '';
+  const officePhone = listing.LO1_PhoneNumber1 || '';
   const agentName = listing.LA1_UserFirstName ? `${listing.LA1_UserFirstName} ${listing.LA1_UserLastName}` : (listing.L_ListAgent1 || 'Unknown');
   const officeName = listing.LO1_OrganizationName || listing.L_ListOffice1 || 'Unknown';
 
@@ -350,10 +353,20 @@ export default function PropertyDetailContent({ id, mlsClass }: { id: number | s
                 <p className="text-sm text-gray-400">
                   <span className="uppercase tracking-widest text-[10px] mr-2">Listing Agent</span>
                   <span className="font-semibold text-white">{agentName}</span>
+                  {(agentPhone || agentEmail) && (
+                    <span className="ml-2 text-gray-400 font-normal">
+                      ({agentPhone}{agentPhone && agentEmail && ' | '}{agentEmail})
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-gray-400">
                   <span className="uppercase tracking-widest text-[10px] mr-2">Listing Office</span>
                   <span className="font-semibold text-white">{officeName}</span>
+                  {officePhone && (
+                    <span className="ml-2 text-gray-400 font-normal">
+                      ({officePhone})
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
