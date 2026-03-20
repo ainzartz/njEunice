@@ -335,6 +335,9 @@ function MapInfoWindowContent({ listing, displayPrice }: { listing: any, display
 
   const address = `${listing.L_AddressNumber || ''} ${listing.L_AddressStreet || ''}`.trim() || 'Address Unavailable';
 
+  const agentName = listing.LA1_UserFirstName ? `${listing.LA1_UserFirstName} ${listing.LA1_UserLastName}` : (listing.L_ListAgent1 || 'Unknown');
+  const officeName = listing.LO1_OrganizationName || listing.L_ListOffice1 || 'Unknown';
+
   return (
     <Link href={`/property/${listing.L_ListingID}?class=${listing.mlsClass || 'RE_1'}`} className="block group">
       <div className="w-[180px] rounded overflow-hidden">
@@ -356,14 +359,24 @@ function MapInfoWindowContent({ listing, displayPrice }: { listing: any, display
         <div className="px-1 pb-1">
           <h4 className="font-bold text-sm text-gray-900 leading-tight mb-1">{displayPrice}</h4>
           <p className="text-xs text-gray-600 leading-tight line-clamp-1 mb-1">{address}</p>
-          <div className="flex justify-between items-center text-[10px] text-gray-400 uppercase tracking-widest mt-2 border-t border-gray-100 pt-1">
+
+          <div className="flex flex-col gap-0.5 mt-1 pt-1 border-t border-gray-100">
+            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider line-clamp-1">
+              Agent: {agentName}
+            </p>
+            <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wider line-clamp-1">
+              Office: {officeName}
+            </p>
+          </div>
+
+          <div className="flex justify-between items-center text-[9px] text-gray-400 uppercase tracking-widest mt-1 border-t border-gray-50 pt-1">
             <span>#{listing.L_ListingID}</span>
-            <div className="relative h-3 w-12 ml-2">
+            <div className="relative h-3 w-10 ml-2">
               <Image
                 src="/images/njmls_logo.png"
                 alt="NJMLS IDX"
                 fill
-                className="object-contain opacity-70"
+                className="object-contain opacity-50"
               />
             </div>
           </div>

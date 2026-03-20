@@ -133,6 +133,9 @@ const PropertyCard = ({ property: listing }: any) => {
   const isResidential = ['RE_1', 'CT_3', 'RN_4', 'MF_2'].includes(listing.mlsClass || 'RE_1');
   const isStudio = isResidential && (!listing.LM_Int1_1 || listing.LM_Int1_1 === '0') && (!listing.L_BedroomsTotal || listing.L_BedroomsTotal === '0');
 
+  const agentName = listing.LA1_UserFirstName ? `${listing.LA1_UserFirstName} ${listing.LA1_UserLastName}` : (listing.L_ListAgent1 || 'Unknown');
+  const officeName = listing.LO1_OrganizationName || listing.L_ListOffice1 || 'Unknown';
+
   return (
     <Link href={`/property/${listing.L_ListingID}?class=${listing.mlsClass || 'RE_1'}`} className="group block h-full">
       <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 flex flex-col h-full group-hover:-translate-y-1">
@@ -201,29 +204,38 @@ const PropertyCard = ({ property: listing }: any) => {
             {address}{unit}, {city} {state} {zip}
           </p>
 
-          <div className="mt-2 flex justify-between items-center min-h-[20px]">
-            {propertyTypeName ? (
-              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em]">
-                {propertyTypeName}
-              </span>
-            ) : <div />}
-            <div className="relative h-4 w-20">
-              <Image
-                src="/images/njmls_logo.png"
-                alt="NJMLS IDX"
-                fill
-                className="object-contain opacity-70"
-              />
+          <div className="mt-3 flex flex-col gap-1.5">
+            <div className="flex justify-between items-center min-h-[20px]">
+              {propertyTypeName ? (
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em]">
+                  {propertyTypeName}
+                </span>
+              ) : <div />}
+              <div className="relative h-4 w-20">
+                <Image
+                  src="/images/njmls_logo.png"
+                  alt="NJMLS IDX"
+                  fill
+                  className="object-contain opacity-70"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-50">
-            {formattedDate ? (
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">
-                Listed on {formattedDate}
-              </p>
-            ) : <div />}
-            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">MLS: {listing.L_ListingID}</span>
+            <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider line-clamp-1 m-0">
+              Listing Agent: <span className="text-gray-700">{agentName}</span>
+            </p>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider line-clamp-1 m-0">
+              Office: {officeName}
+            </p>
+
+            <div className="flex justify-between items-center pt-1.5 border-t border-gray-100 uppercase tracking-wider font-medium text-[10px]">
+              {formattedDate ? (
+                <p className="text-gray-400 m-0">
+                  Listed on {formattedDate}
+                </p>
+              ) : <div />}
+              <span className="text-gray-400">MLS: {listing.L_ListingID}</span>
+            </div>
           </div>
         </div>
       </div>

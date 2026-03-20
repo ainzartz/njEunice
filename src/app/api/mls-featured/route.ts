@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       searchUrl.searchParams.append('Query', query);
       searchUrl.searchParams.append('Format', 'COMPACT');
       searchUrl.searchParams.append('Limit', limit.toString());
-      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit');
+      searchUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit,LA1_UserFirstName,LA1_UserLastName,L_ListAgent1,LO1_OrganizationName,L_ListOffice1');
       searchUrl.searchParams.append('StandardNames', '0');
 
       const res = await fetch(searchUrl.toString(), { method: 'GET', headers: authHeaders });
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       fallbackUrl.searchParams.append('Query', fallbackQuery);
       fallbackUrl.searchParams.append('Format', 'COMPACT');
       fallbackUrl.searchParams.append('Limit', '6');
-      fallbackUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit');
+      fallbackUrl.searchParams.append('Select', 'L_ListingID,L_AskingPrice,L_AddressNumber,L_AddressStreet,L_City,L_State,L_Zip,L_StatusCatID,L_SaleRent,L_ListingDate,LM_Int1_1,LM_Int1_19,LM_Int1_20,L_Type_,LM_Char10_7,L_AddressUnit,LA1_UserFirstName,LA1_UserLastName,L_ListAgent1,LO1_OrganizationName,L_ListOffice1');
       fallbackUrl.searchParams.append('StandardNames', '0');
 
       const fallbackRes = await fetch(fallbackUrl.toString(), { method: 'GET', headers: authHeaders });
