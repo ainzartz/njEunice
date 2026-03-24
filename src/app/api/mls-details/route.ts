@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { updateMlsMetadata } from '@/lib/mls-metadata';
 import { ensureInternalRequest } from '@/lib/api-auth';
 
-const username = process.env.NJMLS_USERNAME;
-const password = process.env.NJMLS_PASSWORD;
 const mlsId = 'njmls';
-
-if (!username || !password) {
-  throw new Error('NJMLS_USERNAME and NJMLS_PASSWORD environment variables are required');
-}
 
 function parseRETSCompact(xmlText: string) {
   try {
@@ -53,6 +47,13 @@ export async function GET(request: NextRequest) {
 
   if (!id) {
     return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
+  }
+
+  const username = process.env.NJMLS_USERNAME;
+  const password = process.env.NJMLS_PASSWORD;
+
+  if (!username || !password) {
+    return NextResponse.json({ error: 'MLS credentials not configured' }, { status: 500 });
   }
 
   const loginUrl = `https://${mlsId}-rets.paragonrels.com/rets/fnisrets.aspx/${mlsId}/login?rets-version=rets/1.8`;

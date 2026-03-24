@@ -3,13 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { updateMlsMetadata } from '@/lib/mls-metadata';
 import { ensureInternalRequest } from '@/lib/api-auth';
 
-const username = process.env.NJMLS_USERNAME;
-const password = process.env.NJMLS_PASSWORD;
 const mlsId = 'njmls';
-
-if (!username || !password) {
-  throw new Error('NJMLS_USERNAME and NJMLS_PASSWORD environment variables are required');
-}
 
 function parseMultipartLocations(text: string): string[] {
   const images: string[] = [];
@@ -31,6 +25,13 @@ export async function GET(request: NextRequest) {
   // Security check: only allow requests from our own domain
   const authError = ensureInternalRequest(request);
   if (authError) return authError;
+
+  const username = process.env.NJMLS_USERNAME;
+  const password = process.env.NJMLS_PASSWORD;
+
+  if (!username || !password) {
+    return NextResponse.json({ error: 'MLS credentials not configured' }, { status: 500 });
+  }
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
