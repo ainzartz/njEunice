@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { updateMlsMetadata } from '@/lib/mls-metadata';
 import { ensureInternalRequest } from '@/lib/api-auth';
 
-const username = '9500181';
-const password = 'Sun$3t!620w';
+const username = process.env.NJMLS_USERNAME;
+const password = process.env.NJMLS_PASSWORD;
 const mlsId = 'njmls';
+
+if (!username || !password) {
+  throw new Error('NJMLS_USERNAME and NJMLS_PASSWORD environment variables are required');
+}
 
 function parseRETSCompact(xmlText: string) {
   try {

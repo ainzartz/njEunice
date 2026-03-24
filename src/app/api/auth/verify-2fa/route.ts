@@ -19,21 +19,37 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = email.toLowerCase().trim();
 
     // 1. Verify the code
+    const MAX_ATTEMPTS = 5;
+
     const verification = await prisma.verificationCode.findFirst({
       where: {
         email: normalizedEmail,
-        code,
-        expiresAt: {
-          gt: new Date(),
-        },
+        expiresAt: { gt: new Date() },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!verification) {
       return NextResponse.json({ error: 'Invalid or expired verification code' }, { status: 400 });
+    }
+
+    // 시도 횟수 초과 시 코드 즉시 삭제
+    if (verification.attempts >= MAX_ATTEMPTS) {
+      await prisma.verificationCode.delete({ where: { id: verification.id } });
+      return NextResponse.json({ error: 'Too many failed attempts. Please request a new code.' }, { status: 429 });
+    }
+
+    // 코드 불일치 시 attempts 증가
+    if (verification.code !== code) {
+      await prisma.verificationCode.update({
+        where: { id: verification.id },
+        data: { attempts: { increment: 1 } },
+      });
+      const remaining = MAX_ATTEMPTS - (verification.attempts + 1);
+      return NextResponse.json(
+        { error: `Invalid verification code. ${remaining} attempt(s) remaining.` },
+        { status: 400 }
+      );
     }
 
     // 2. Find the user

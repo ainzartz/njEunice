@@ -3,13 +3,12 @@ import type { NextRequest } from 'next/server';
 
 // Simple in-memory rate limiting (Note: This is per-instance in serverless)
 const ipCache = new Map<string, { count: number; lastReset: number }>();
+const authIpCache = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 1000; // 1000 requests per minute per IP (relaxed to accommodate image fetches)
+const AUTH_MAX_REQUESTS_PER_WINDOW = 10; // 10 requests per minute for auth endpoints
 
 function isRateLimited(ip: string, pathname: string): boolean {
-  // We can be more lenient with image requests as they are high volume but lower risk
-  const isImageRequest = pathname.includes('mls-image');
-
   const now = Date.now();
   const userData = ipCache.get(ip);
 
@@ -18,14 +17,43 @@ function isRateLimited(ip: string, pathname: string): boolean {
     return false;
   }
 
-  // Increment count only for non-image requests or use a much higher multiplier for images
-  // For now, let's just use the much higher global limit of 1000.
   userData.count += 1;
   return userData.count > MAX_REQUESTS_PER_WINDOW;
 }
 
+function isAuthRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const userData = authIpCache.get(ip);
+
+  if (!userData || now - userData.lastReset > RATE_LIMIT_WINDOW) {
+    authIpCache.set(ip, { count: 1, lastReset: now });
+    return false;
+  }
+
+  userData.count += 1;
+  return userData.count > AUTH_MAX_REQUESTS_PER_WINDOW;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Auth 엔드포인트 전용 엄격한 Rate Limiting (분당 10회)
+  if (
+    pathname === '/api/auth/login' ||
+    pathname === '/api/auth/verify-2fa' ||
+    pathname === '/api/auth/request-reset' ||
+    pathname === '/api/auth/reset-password'
+  ) {
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : (request.headers.get('x-real-ip') || 'anonymous');
+
+    if (isAuthRateLimited(ip)) {
+      return new NextResponse(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
 
   // Only apply to MLS API routes
   if (pathname.startsWith('/api/mls-') || pathname.startsWith('/api/property-')) {

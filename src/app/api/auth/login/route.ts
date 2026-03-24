@@ -56,9 +56,15 @@ export async function POST(request: NextRequest) {
 
     // Credential verification successful. Now trigger 2FA dispatch.
 
-    // Generate 6-digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate 6-digit code (cryptographically secure)
+    const { randomInt } = await import('crypto');
+    const code = randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes
+
+    // 기존 미사용 코드 삭제 (재사용 방지)
+    await prisma.verificationCode.deleteMany({
+      where: { email: user.email.toLowerCase().trim() },
+    });
 
     // Store in DB
     await prisma.verificationCode.create({
